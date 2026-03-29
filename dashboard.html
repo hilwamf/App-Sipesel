@@ -2,42 +2,71 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Pengguna</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link href="./src/output.css" rel="stylesheet">
     <script src="js/script.js"></script>
 </head>
-<body class="windows-bg">
 
-<body class="dashboard-bg">
+<body class="relative min-h-screen text-white bg-[url('images/kios2.jpg')] bg-cover bg-center">
+
+    <!-- Overlay gelap -->
+    <div class="absolute inset-0 bg-black/60"></div>
 
     <!-- NAVBAR -->
-    <nav class="dashboard-nav">
-        <div class="logo">SIPESEL</div>
-        <ul>
-            <li><a href="#">Home</a></li>
-            <li><a href="#">Tagihan</a></li>
-            <li><a href="#">Riwayat</a></li>
-            <li><a href="index.html" class="logout-btn">Logout</a></li>
+    <nav class="relative z-10 flex justify-between items-center px-6 md:px-12 py-4">
+        <div class="text-yellow-400 font-bold text-lg md:text-xl">
+            SIPESEL
+        </div>
+
+        <ul class="flex gap-4 md:gap-8 items-center text-sm md:text-base">
+            <li><a href="#" class="hover:text-yellow-400 transition">Home</a></li>
+            <li><a href="#" class="hover:text-yellow-400 transition">Tagihan</a></li>
+            <li><a href="#" class="hover:text-yellow-400 transition">Riwayat</a></li>
+            <li>
+                <a href="index.html"
+                   class="bg-green-700 px-4 py-2 rounded-full hover:bg-green-900 transition">
+                    Logout
+                </a>
+            </li>
         </ul>
     </nav>
 
     <!-- HERO SECTION -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1>Sistem Pembayaran Pajak Kios</h1>
-            <p>Kelola dan bayar pajak kios Anda dengan mudah dan cepat.</p>
-            <button onclick="lihatTagihan()">Lihat Tagihan</button>
+    <section class="relative z-10 flex items-center h-screen px-6 md:px-20">
+        <div class="max-w-xl">
+            <h1 class="text-3xl md:text-5xl font-bold mb-4 md:mb-6 leading-tight">
+                Sistem Pembayaran Pajak Kios
+            </h1>
+            <h2 id="welcomeUser" class="text-lg mb-4 text-yellow-400"></h2>
+
+            <p class="text-sm md:text-lg opacity-90 mb-6 md:mb-8">
+                Kelola dan bayar pajak kios Anda dengan mudah dan cepat.
+            </p>
+
+            <button onclick="lihatTagihan()"
+                class="bg-yellow-400 text-green-900 px-5 md:px-6 py-2 md:py-3 rounded-full font-semibold hover:scale-105 transition">
+                Lihat Tagihan
+            </button>
         </div>
     </section>
 
-</body>
-<script>
+    <!-- SCRIPT -->
+   <script>
 window.onload = function() {
-    if(localStorage.getItem("loginSuccess") === "true"){
-        alert("Login berhasil 🎉 Selamat datang di Dashboard!");
-        localStorage.removeItem("loginSuccess");
+
+    const user = sessionStorage.getItem("user");
+
+    if(!user){
+        alert("Kamu belum login!");
+        window.location.href = "login.html";
+    } else {
+        document.getElementById("welcomeUser").innerText = "Halo, " + user + " 👋";
     }
+
 }
 </script>
+</script>
+
 </body>
 </html>
