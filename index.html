@@ -2,43 +2,55 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sipesel | Sistem Pembayaran Pajak Kios</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Dashboard Pengguna</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="js/script.js"></script>
 </head>
-<body>
 
-    <div class="bg-animate"></div>
+<body class="bg-gradient-to-br from-green-900 via-green-700 to-green-500 min-h-screen text-white">
 
-    <div class="landing-container">
-        
-        <div class="hero-content">
-            <div class="logo-wrapper">
-                <img src="images/logo-sipesel.png" alt="Logo SIPESEL" class="main-logo">
-            </div>
+    <!-- NAVBAR -->
+    <nav class="flex justify-between items-center px-10 py-4 bg-white/10 backdrop-blur-md shadow-md">
+        <div class="text-2xl font-bold tracking-wide">SIPESEL</div>
+        <ul class="flex gap-6 items-center text-sm">
+            <li><a href="#" class="hover:text-yellow-300 transition">Home</a></li>
+            <li><a href="#" class="hover:text-yellow-300 transition">Tagihan</a></li>
+            <li><a href="#" class="hover:text-yellow-300 transition">Riwayat</a></li>
+            <li>
+                <a href="index.html" 
+                   class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg transition">
+                   Logout
+                </a>
+            </li>
+        </ul>
+    </nav>
 
-            <h1 class="glow-text">SIPESEL</h1>
-            <h3>Sistem Pengelolaan Pajak Kios</h3>
-
-            <p class="description">
-                Solusi cerdas untuk membantu pemilik kios memantau tagihan, 
-                melakukan pembayaran aman, dan melihat riwayat transaksi dalam satu platform futuristik.
+    <!-- HERO SECTION -->
+    <section class="flex items-center justify-center text-center h-[80vh] px-6">
+        <div class="max-w-2xl">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                Sistem Pembayaran Pajak Kios
+            </h1>
+            <p class="text-lg text-blue-100 mb-6">
+                Kelola dan bayar pajak kios Anda dengan mudah dan cepat.
             </p>
 
-            <div class="button-group">
-                <a href="login.html" class="btn btn-login">
-                    <span>Masuk ke Akun</span>
-                </a>
-                <a href="register.html" class="btn btn-register">
-                    <span>Daftar Sekarang</span>
-                </a>
-            </div>
+            <button onclick="lihatTagihan()"
+                class="bg-yellow-400 text-black font-semibold px-6 py-3 rounded-xl 
+                       hover:bg-yellow-300 transition shadow-lg">
+                Lihat Tagihan
+            </button>
         </div>
+    </section>
 
-        <div class="landing-footer">
-            &copy; 2026 SIPESEL.
-        </div>
-    </div>
+    <script>
+    window.onload = function() {
+        if(localStorage.getItem("loginSuccess") === "true"){
+            alert("Login berhasil 🎉 Selamat datang di Dashboard!");
+            localStorage.removeItem("loginSuccess");
+        }
+    }
+    </script>
 
 </body>
 </html>
