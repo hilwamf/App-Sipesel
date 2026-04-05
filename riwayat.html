@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pembayaran - SIPESEL</title>
@@ -40,8 +41,8 @@
                     Sistem Informasi Pembayaran Pajak Pasar
                 </span>
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-green-900 font-bold text-sm">N</div>
-                    <span class="text-green-100 text-sm font-medium hidden sm:block">Nabil</span>
+                    <div class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-green-900 font-bold text-sm" id="avatarInitial">B</div>
+                    <span class="text-green-100 text-sm font-medium hidden sm:block" id="navUsername">Pengguna</span>
                 </div>
             </div>
         </div>
@@ -60,7 +61,7 @@
                  <span>Riwayat Bayar</span>
             </a>
             <div class="ml-auto">
-                <a href="login.php"
+                <a href="login.html"
                    class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 flex items-center gap-2">
                      <span>Keluar</span>
                 </a>
@@ -364,6 +365,10 @@
         function viewDetail(id) {
             alert('Menampilkan detail transaksi ' + id);
         }
+
+        const user = sessionStorage.getItem("user");
+        document.getElementById("navUsername").innerText = user;
+        document.getElementById("avatarInitial").innerText = user.charAt(0).toUpperCase();
     </script>
 
     <!-- Footer -->
