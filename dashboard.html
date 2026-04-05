@@ -3,36 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Pengguna</title>
+    <title>Dashboard Pengguna - SIPESEL</title>
     <link href="./src/output.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="js/script.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
 </head>
 
-<body 
-style="background-image: url('images/kios2.jpg');"
-class="relative min-h-screen text-white bg-cover bg-center">
+<body
+    style="background-image: url('images/kios2.jpg');"
+    class="relative min-h-screen text-white bg-cover bg-center">
 
     <!-- Overlay gelap -->
     <div class="absolute inset-0 bg-black/30"></div>
 
-    <!-- NAVBAR -->
-    <nav class="relative z-10 flex justify-between items-center px-6 md:px-12 py-4">
-        <div class="text-yellow-400 font-bold text-lg md:text-xl">
-            SIPESEL
+    <!-- ===== NAVBAR (sama dengan riwayat) ===== -->
+    <header class="bg-gradient-to-r from-green-800 via-green-700 to-green-800 shadow-xl sticky top-0 z-50">
+        <!-- Top bar: SIPESEL branding -->
+        <div class="border-b border-green-600/50 py-2 px-6">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                <span class="font-extrabold text-yellow-400 text-2xl tracking-widest drop-shadow-sm"
+                      style="font-family: 'Montserrat', sans-serif;">
+                    SIPESEL
+                </span>
+                <span class="text-green-300 text-xs font-medium tracking-wide hidden sm:block">
+                    Sistem Informasi Pembayaran Pajak Pasar
+                </span>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-green-900 font-bold text-sm" id="avatarInitial">B</div>
+                    <span class="text-green-100 text-sm font-medium hidden sm:block" id="navUsername">Pengguna</span>
+                </div>
+            </div>
         </div>
-
-        <ul class="flex gap-4 md:gap-8 items-center text-sm md:text-base">
-            <li><a href="#" class="hover:text-yellow-400 transition">Home</a></li>
-            <li><a href="#" class="hover:text-yellow-400 transition">Tagihan</a></li>
-            <li><a href="#" class="hover:text-yellow-400 transition">Riwayat</a></li>
-            <li>
+        <!-- Nav links -->
+        <nav class="max-w-6xl mx-auto px-6 flex items-center gap-1 py-2">
+            <a href="#"
+               class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm flex items-center gap-2">
+                 <span>Dashboard</span>
+            </a>
+            <a href="#"
+               class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
+                 <span>Tagihan</span>
+            </a>
+            <a href="riwayat.html"
+               class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
+                 <span>Riwayat Bayar</span>
+            </a>
+            <div class="ml-auto">
                 <a href="index.html"
-                   class="bg-green-700 px-4 py-2 rounded-full hover:bg-green-900 transition">
-                    Logout
+                   class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 flex items-center gap-2">
+                     <span>Keluar</span>
                 </a>
-            </li>
-        </ul>
-    </nav>
+            </div>
+        </nav>
+    </header>
 
     <!-- HERO SECTION -->
     <section class="relative z-10 flex items-center h-screen px-6 md:px-20">
@@ -51,24 +80,26 @@ class="relative min-h-screen text-white bg-cover bg-center">
                 Lihat Tagihan
             </button>
         </div>
-    </section>
 
     <!-- SCRIPT -->
-   <script>
-window.onload = function() {
+    <script>
+        window.onload = function () {
+            const user = sessionStorage.getItem("user");
 
-    const user = sessionStorage.getItem("user");
+            if (!user) {
+                alert("Kamu belum login!");
+                window.location.href = "login.html";
+            } else {
+                document.getElementById("welcomeUser").innerText = "Halo, " + user + " 👋";
 
-    if(!user){
-        alert("Kamu belum login!");
-        window.location.href = "login.html";
-    } else {
-        document.getElementById("welcomeUser").innerText = "Halo, " + user + " 👋";
-    }
+                // Update nama di navbar
+                document.getElementById("navUsername").innerText = user;
 
-}
-</script>
-
+                // Update initial avatar
+                document.getElementById("avatarInitial").innerText = user.charAt(0).toUpperCase();
+            }
+        }
+    </script>
 
 </body>
 </html>
