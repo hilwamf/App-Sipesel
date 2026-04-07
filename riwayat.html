@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pembayaran - SIPESEL</title>
@@ -25,44 +24,48 @@
         body { font-family: 'Poppins', sans-serif; }
         .row-hover { transition: transform 0.2s, box-shadow 0.2s; }
         .row-hover:hover { transform: translateX(5px); }
+
+        /* Popup bukti */
+        .popup-overlay { display: none; }
+        .popup-overlay.show { display: flex; }
+
+        /* Print / simpan style */
+        @media print {
+            body > *:not(#printArea) { display: none !important; }
+            #printArea { display: block !important; position: fixed; inset: 0; padding: 20px; background: white; }
+        }
     </style>
 </head>
 <body class="bg-green-50 text-neutral-900 min-h-screen">
 
     <!-- ===== NAVBAR ===== -->
-    <header class="bg-gradient-to-r from-green-800 via-green-700 to-green-800 shadow-xl sticky top-0 z-50">
-        <!-- Top bar: SIPESEL branding -->
-        <div class="border-b border-green-600/50 py-2 px-6">
+    <header class="shadow-xl sticky top-0 z-50" style="background: linear-gradient(to right, #166534, #15803d, #166534);">
+        <div class="py-2 px-6" style="border-bottom: 1px solid rgba(22,163,74,0.4);">
             <div class="max-w-6xl mx-auto flex items-center justify-between">
-                <span class="font-heading font-extrabold text-yellow-400 text-2xl tracking-widest drop-shadow-sm">
+                <span class="font-extrabold text-yellow-400 text-2xl tracking-widest drop-shadow-sm" style="font-family:'Montserrat',sans-serif;">
                     SIPESEL
                 </span>
                 <span class="text-green-300 text-xs font-medium tracking-wide hidden sm:block">
                     Sistem Informasi Pembayaran Pajak Pasar
                 </span>
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-green-900 font-bold text-sm" id="avatarInitial">B</div>
-                    <span class="text-green-100 text-sm font-medium hidden sm:block" id="navUsername">Pengguna</span>
+                    <div id="avatarInitial" class="w-8 h-8 rounded-full bg-yellow-400 flex items-center justify-center text-green-900 font-bold text-sm">?</div>
+                    <span id="navUsername" class="text-green-100 text-sm font-medium hidden sm:block">Pengguna</span>
                 </div>
             </div>
         </div>
-        <!-- Nav links -->
         <nav class="max-w-6xl mx-auto px-6 flex items-center gap-1 py-2">
-            <a href="dashboard.html"
-               class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
+            <a href="dashboard.html" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
                  <span>Dashboard</span>
             </a>
-            <a href="#"
-               class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
-                 <span>Tagihan</span>
+            <a href="pembayaran.html" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
+                 <span>Pembayaran</span>
             </a>
-            <a href="#"
-               class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm flex items-center gap-2">
+            <a href="riwayat.html" class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm flex items-center gap-2">
                  <span>Riwayat Bayar</span>
             </a>
             <div class="ml-auto">
-                <a href="login.html"
-                   class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 flex items-center gap-2">
+                <a href="login.html" class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 flex items-center gap-2">
                      <span>Keluar</span>
                 </a>
             </div>
@@ -72,14 +75,11 @@
     <!-- ===== CONTENT ===== -->
     <div class="max-w-6xl mx-auto px-6 py-8">
 
-        <!-- Back Link -->
-
         <!-- Page Header -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-10">
-            <h1 class="font-heading font-extrabold text-4xl text-neutral-900">
+            <h1 class="font-extrabold text-4xl text-neutral-900" style="font-family:'Montserrat',sans-serif;">
                 Riwayat Pembayaran
             </h1>
-            <!-- Filter Buttons -->
             <div class="flex gap-3 flex-wrap">
                 <button onclick="filterHistory('all', this)"
                         class="filter-btn px-5 py-2.5 rounded-xl font-semibold text-sm border-2 border-green-500 bg-gradient-to-br from-green-600 to-green-400 text-white transition-all duration-300">
@@ -104,31 +104,27 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
             <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600">
                 <p class="text-neutral-500 text-sm mb-2">Total Pembayaran Tahun Ini</p>
-                <p class="font-heading font-extrabold text-3xl text-neutral-900">Rp 5.200.000</p>
+                <p class="font-extrabold text-3xl text-neutral-900" id="statTotal" style="font-family:'Montserrat',sans-serif;">Rp 0</p>
             </div>
             <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600">
                 <p class="text-neutral-500 text-sm mb-2">Jumlah Transaksi</p>
-                <p class="font-heading font-extrabold text-3xl text-neutral-900">12</p>
+                <p class="font-extrabold text-3xl text-neutral-900" id="statJumlah" style="font-family:'Montserrat',sans-serif;">0</p>
             </div>
             <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600">
                 <p class="text-neutral-500 text-sm mb-2">Rata-rata per Transaksi</p>
-                <p class="font-heading font-extrabold text-3xl text-neutral-900">Rp 433.333</p>
+                <p class="font-extrabold text-3xl text-neutral-900" id="statRataRata" style="font-family:'Montserrat',sans-serif;">Rp 0</p>
             </div>
         </div>
 
         <!-- History Card -->
         <div class="bg-white rounded-2xl p-8 shadow-sm">
-            <!-- Card Header -->
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <h2 class="font-heading font-bold text-2xl text-neutral-900">Daftar Transaksi</h2>
-                <!-- Search Box -->
+                <h2 class="font-bold text-2xl text-neutral-900" style="font-family:'Montserrat',sans-serif;">Daftar Transaksi</h2>
                 <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-lg pointer-events-none"></span>
-                    <input type="text"
-                           placeholder="Cari transaksi..."
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none">🔍</span>
+                    <input type="text" placeholder="Cari transaksi..."
                            onkeyup="searchHistory(this.value)"
-                           class="pl-10 pr-4 py-2.5 w-72 border-2 border-neutral-200 rounded-xl text-sm font-sans
-                                  focus:outline-none focus:border-green-500 transition-all duration-300">
+                           class="pl-10 pr-4 py-2.5 w-72 border-2 border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-green-500 transition-all duration-300">
                 </div>
             </div>
 
@@ -140,216 +136,231 @@
                             <th class="text-left px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jenis Pajak</th>
                             <th class="text-left px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Tanggal</th>
                             <th class="text-left px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Jumlah</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Metode</th>
                             <th class="text-left px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Status</th>
-                            <th class="text-left px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">bukti</th>
+                            <th class="text-left px-4 py-3 text-xs font-semibold text-neutral-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody id="historyBody">
-
-                        <!-- Row 1 -->
-                        <tr data-status="success"
-                            class="row-hover bg-neutral-50 hover:bg-white hover:shadow-md rounded-xl">
-                            <td class="px-4 py-5 rounded-l-xl">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">💼</div>
-                                    <div>
-                                        <p class="font-semibold text-neutral-900 text-sm">Pajak kios nomor 001</p>
-                                        <p class="text-xs text-neutral-500 mt-0.5">TRX-2026-0405-001234</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-5 text-sm text-neutral-700">5 April 2026</td>
-                            <td class="px-4 py-5">
-                                <span class="font-heading font-bold text-lg text-green-600">Rp 30.000</span>
-                            </td>
-                            <td class="px-4 py-5">
-                                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Berhasil</span>
-                            </td>
-                            <td class="px-4 py-5 rounded-r-xl">
-                                <button onclick="viewDetail('001234')"
-                                        class="px-4 py-2 bg-gradient-to-br from-green-600 to-green-400 text-white text-xs font-semibold rounded-lg
-                                               hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-200 transition-all duration-300">
-                                    Unduh Bukti
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 2 -->
-                        <tr data-status="success"
-                            class="row-hover bg-neutral-50 hover:bg-white hover:shadow-md rounded-xl">
-                            <td class="px-4 py-5 rounded-l-xl">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">🚗</div>
-                                    <div>
-                                        <p class="font-semibold text-neutral-900 text-sm">Pajak kios nomor 002</p>
-                                        <p class="text-xs text-neutral-500 mt-0.5">TRX-2026-0328-000987</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-5 text-sm text-neutral-700">28 Maret 2026</td>
-                            <td class="px-4 py-5">
-                                <span class="font-heading font-bold text-lg text-green-600">Rp 75.000</span>
-                            </td>
-                            <td class="px-4 py-5">
-                                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Berhasil</span>
-                            </td>
-                            <td class="px-4 py-5 rounded-r-xl">
-                                <button onclick="viewDetail('000987')"
-                                        class="px-4 py-2 bg-gradient-to-br from-green-600 to-green-400 text-white text-xs font-semibold rounded-lg
-                                               hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-200 transition-all duration-300">
-                                    Unduh Bukti
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 3 -->
-                        <tr data-status="pending"
-                            class="row-hover bg-neutral-50 hover:bg-white hover:shadow-md rounded-xl">
-                            <td class="px-4 py-5 rounded-l-xl">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">🏢</div>
-                                    <div>
-                                        <p class="font-semibold text-neutral-900 text-sm">Pajak kios nomor 003</p>
-                                        <p class="text-xs text-neutral-500 mt-0.5">TRX-2026-0325-000876</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-5 text-sm text-neutral-700">25 Maret 2026</td>
-                            <td class="px-4 py-5">
-                                <span class="font-heading font-bold text-lg text-green-600">Rp 25.000</span>
-                            </td>
-                            <td class="px-4 py-5">
-                                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-600">⏳ Pending</span>
-                            </td>
-                            <td class="px-4 py-5 rounded-r-xl">
-                                <button onclick="viewDetail('000876')"
-                                        class="px-4 py-2 bg-gradient-to-br from-green-600 to-green-400 text-white text-xs font-semibold rounded-lg
-                                               hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-200 transition-all duration-300">
-                                    Unduh Bukti
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 4 -->
-                        <tr data-status="success"
-                            class="row-hover bg-neutral-50 hover:bg-white hover:shadow-md rounded-xl">
-                            <td class="px-4 py-5 rounded-l-xl">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">🏪</div>
-                                    <div>
-                                        <p class="font-semibold text-neutral-900 text-sm">Pajak kios nomor 004</p>
-                                        <p class="text-xs text-neutral-500 mt-0.5">TRX-2026-0318-000765</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-5 text-sm text-neutral-700">18 Maret 2026</td>
-                            <td class="px-4 py-5">
-                                <span class="font-heading font-bold text-lg text-green-600">Rp 20.000</span>
-                            </td>
-                            <td class="px-4 py-5">
-                                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Berhasil</span>
-                            </td>
-                            <td class="px-4 py-5 rounded-r-xl">
-                                <button onclick="viewDetail('000765')"
-                                        class="px-4 py-2 bg-gradient-to-br from-green-600 to-green-400 text-white text-xs font-semibold rounded-lg
-                                               hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-200 transition-all duration-300">
-                                    Unduh Bukti
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 5 -->
-                        <tr data-status="success"
-                            class="row-hover bg-neutral-50 hover:bg-white hover:shadow-md rounded-xl">
-                            <td class="px-4 py-5 rounded-l-xl">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">💼</div>
-                                    <div>
-                                        <p class="font-semibold text-neutral-900 text-sm">Pajak kios nomor 005</p>
-                                        <p class="text-xs text-neutral-500 mt-0.5">TRX-2026-0310-000654</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-5 text-sm text-neutral-700">10 Maret 2026</td>
-                            <td class="px-4 py-5">
-                                <span class="font-heading font-bold text-lg text-green-600">Rp 85.000</span>
-                            </td>
-                            <td class="px-4 py-5">
-                                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Berhasil</span>
-                            </td>
-                            <td class="px-4 py-5 rounded-r-xl">
-                                <button onclick="viewDetail('000654')"
-                                        class="px-4 py-2 bg-gradient-to-br from-green-600 to-green-400 text-white text-xs font-semibold rounded-lg
-                                               hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-200 transition-all duration-300">
-                                    Unduh Bukti
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 6 -->
-                        <tr data-status="failed"
-                            class="row-hover bg-neutral-50 hover:bg-white hover:shadow-md rounded-xl">
-                            <td class="px-4 py-5 rounded-l-xl">
-                                <div class="flex items-center gap-4">
-                                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">🏪</div>
-                                    <div>
-                                        <p class="font-semibold text-neutral-900 text-sm">Pajak kios nomor 006</p>
-                                        <p class="text-xs text-neutral-500 mt-0.5">TRX-2026-0305-000543</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-4 py-5 text-sm text-neutral-700">5 Maret 2026</td>
-                            <td class="px-4 py-5">
-                                <span class="font-heading font-bold text-lg text-green-600">Rp 40.000</span>
-                            </td>
-                            <td class="px-4 py-5">
-                                <span class="px-4 py-1.5 rounded-full text-xs font-semibold bg-red-100 text-red-600">✗ Gagal</span>
-                            </td>
-                            <td class="px-4 py-5 rounded-r-xl">
-                                <button onclick="viewDetail('000543')"
-                                        class="px-4 py-2 bg-gradient-to-br from-green-600 to-green-400 text-white text-xs font-semibold rounded-lg
-                                               hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-200 transition-all duration-300">
-                                    Unduh Bukti
-                                </button>
-                            </td>
-                        </tr>
-
+                        <!-- Diisi oleh JavaScript -->
                     </tbody>
                 </table>
             </div>
 
-            <!-- No Data State (hidden by default) -->
+            <!-- No Data -->
             <div id="noData" class="hidden text-center py-16 text-neutral-400">
-                <div class="text-5xl mb-3">📭</div>
-                <p class="font-semibold text-base">Tidak ada transaksi ditemukan</p>
+                <div class="text-5xl mb-3"></div>
+                <p class="font-semibold text-base">Belum ada transaksi</p>
+                <a href="pembayaran.html" class="inline-block mt-4 px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition">
+                    + Bayar Sekarang
+                </a>
             </div>
         </div>
-
     </div>
 
-    <script>
-        function filterHistory(status, btn) {
-            // Update active button style
-            document.querySelectorAll('.filter-btn').forEach(b => {
-                b.classList.remove('bg-gradient-to-br', 'from-green-600', 'to-green-400', 'text-white', 'border-green-500');
-                b.classList.add('bg-white', 'text-neutral-700', 'border-neutral-200');
-            });
-            btn.classList.add('bg-gradient-to-br', 'from-green-600', 'to-green-400', 'text-white', 'border-green-500');
-            btn.classList.remove('bg-white', 'text-neutral-700', 'border-neutral-200');
+    <!-- ===== POPUP BUKTI ===== -->
+    <div id="popupOverlay" class="popup-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
 
-            // Filter rows
+            <!-- Header struk -->
+            <div class="p-6 text-center" style="background: linear-gradient(135deg, #166534, #15803d);">
+                <p class="text-green-300 text-xs tracking-widest uppercase mb-1">Bukti Pembayaran</p>
+                <p class="text-yellow-400 font-extrabold text-xl tracking-widest" style="font-family:'Montserrat',sans-serif;">SIPESEL</p>
+                <p class="text-green-300 text-xs mt-1" id="popDate">-</p>
+            </div>
+
+            <!-- Notch atas -->
+            <div class="flex items-center px-4">
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5 mt-0"></div>
+                <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5 mt-0"></div>
+            </div>
+
+            <!-- Detail -->
+            <div id="buktContent" class="px-7 py-5 space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span class="text-neutral-400">No. Transaksi</span>
+                    <span class="font-mono text-xs font-semibold text-neutral-700" id="popId">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-neutral-400">Nama</span>
+                    <span class="font-semibold text-neutral-800" id="popUser">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-neutral-400">Nomor Kios</span>
+                    <span class="font-semibold text-neutral-800" id="popKios">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-neutral-400">Jenis Pajak</span>
+                    <span class="font-semibold text-neutral-800" id="popJenis">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-neutral-400">Metode Bayar</span>
+                    <span class="font-semibold text-neutral-800" id="popMetode">-</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-neutral-400">Status</span>
+                    <span class="px-3 py-0.5 rounded-full bg-green-100 text-green-700 text-xs font-bold">✓ Berhasil</span>
+                </div>
+            </div>
+
+            <!-- Notch bawah -->
+            <div class="flex items-center px-4">
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5"></div>
+                <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5"></div>
+            </div>
+
+            <!-- Total -->
+            <div class="px-7 py-5 bg-green-50 text-center">
+                <p class="text-neutral-400 text-xs mb-1">Total Dibayarkan</p>
+                <p class="font-extrabold text-3xl text-green-600" id="popTotal" style="font-family:'Montserrat',sans-serif;">Rp 0</p>
+            </div>
+
+            <!-- Tombol -->
+            <div class="p-5 flex gap-3">
+                <button onclick="tutupPopup()"
+                        class="flex-1 py-2.5 border-2 border-neutral-200 text-neutral-600 rounded-xl text-sm font-semibold hover:border-red-300 hover:text-red-500 transition">
+                    Tutup
+                </button>
+                <button onclick="simpanBukti()"
+                        class="flex-1 py-2.5 bg-gradient-to-r from-green-700 to-green-500 text-white rounded-xl text-sm font-semibold hover:shadow-lg hover:shadow-green-200 transition flex items-center justify-center gap-2">
+                     Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Area print tersembunyi -->
+    <div id="printArea" style="display:none;"></div>
+
+    <!-- Footer -->
+    <footer class="bg-green-800 text-green-300 text-center text-xs py-4 mt-10">
+        &copy; 2026 <span class="text-yellow-400 font-bold">SIPESEL</span> — Sistem Informasi Pembayaran Pajak Pasar. All rights reserved.
+    </footer>
+
+    <script>
+        let currentTrx = null;
+        let allData    = [];
+
+        // ── ICONS metode ──
+        const metodeIcon = {
+            'DANA'        : '',
+            'Transfer Bank': '',
+            'QRIS'         : '',
+            'Gopay': '',
+        };
+
+        // ── LOAD ──
+        window.onload = function () {
+            const user = sessionStorage.getItem("user");
+            if (!user) { window.location.href = "login.html"; return; }
+            document.getElementById("navUsername").innerText = user;
+            document.getElementById("avatarInitial").innerText = user.charAt(0).toUpperCase();
+
+            loadRiwayat();
+        };
+
+        function loadRiwayat() {
+            // Gabungkan data hardcoded + localStorage
+            const stored = JSON.parse(localStorage.getItem('riwayat_bayar') || '[]');
+
+            // Data bawaan (demo)
+            const dummy = [
+                { id:'TRX-20260405-001234', kios:'K-001', jenis:'Bulanan',  metode:'Transfer Bank', jumlah:140000, tanggal:'5 April 2026',  status:'success', user:'Demo' },
+                { id:'TRX-20260328-000987', kios:'K-003', jenis:'Mingguan', metode:'QRIS',          jumlah:35000,  tanggal:'28 Maret 2026', status:'success', user:'Demo' },
+                { id:'TRX-20260325-000876', kios:'K-002', jenis:'Harian',   metode:'DANA',         jumlah:5000,   tanggal:'25 Maret 2026', status:'pending', user:'Demo' },
+                { id:'TRX-20260318-000765', kios:'K-004', jenis:'Bulanan',  metode:'Gopay',jumlah:140000, tanggal:'18 Maret 2026', status:'success', user:'Demo' },
+                { id:'TRX-20260305-000543', kios:'K-005', jenis:'Mingguan', metode:'Transfer Bank', jumlah:35000,  tanggal:'5 Maret 2026',  status:'failed',  user:'Demo' },
+            ];
+
+            allData = [...stored, ...dummy];
+            renderTable(allData);
+            updateStats(allData);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('historyBody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                document.getElementById('noData').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('noData').classList.add('hidden');
+
+            data.forEach(trx => {
+                const icon = metodeIcon[trx.metode] || '💳';
+                const statusBadge = trx.status === 'success'
+                    ? `<span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Berhasil</span>`
+                    : trx.status === 'pending'
+                    ? `<span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-600">⏳ Pending</span>`
+                    : `<span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600">✗ Gagal</span>`;
+
+                const row = document.createElement('tr');
+                row.dataset.status = trx.status;
+                row.className = 'row-hover bg-neutral-50 hover:bg-white hover:shadow-md rounded-xl';
+                row.innerHTML = `
+                    <td class="px-4 py-4 rounded-l-xl">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">🏪</div>
+                            <div>
+                                <p class="font-semibold text-neutral-900 text-sm">Pajak Kios ${trx.kios}</p>
+                                <p class="text-xs text-neutral-400 font-mono">${trx.id}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-4 text-sm text-neutral-600">${trx.tanggal}</td>
+                    <td class="px-4 py-4">
+                        <span class="font-extrabold text-lg text-green-600" style="font-family:'Montserrat',sans-serif;">
+                            Rp ${trx.jumlah.toLocaleString('id-ID')}
+                        </span>
+                    </td>
+                    <td class="px-4 py-4 text-sm text-neutral-600">
+                        <span class="flex items-center gap-1">${icon} ${trx.metode}</span>
+                    </td>
+                    <td class="px-4 py-4">${statusBadge}</td>
+                    <td class="px-4 py-4 rounded-r-xl">
+                        <button onclick='bukaPopup(${JSON.stringify(trx)})'
+                                class="px-4 py-2 bg-gradient-to-br from-green-600 to-green-400 text-white text-xs font-semibold rounded-lg
+                                       hover:-translate-y-0.5 hover:shadow-lg hover:shadow-green-200 transition-all duration-300">
+                             Unduh Bukti
+                        </button>
+                    </td>`;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStats(data) {
+            const success = data.filter(d => d.status === 'success');
+            const total   = success.reduce((s, d) => s + d.jumlah, 0);
+            const rata    = success.length ? Math.round(total / success.length) : 0;
+
+            document.getElementById('statTotal').innerText    = 'Rp ' + total.toLocaleString('id-ID');
+            document.getElementById('statJumlah').innerText   = data.length;
+            document.getElementById('statRataRata').innerText = 'Rp ' + rata.toLocaleString('id-ID');
+        }
+
+        // ── FILTER ──
+        function filterHistory(status, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => {
+                b.classList.remove('bg-gradient-to-br','from-green-600','to-green-400','text-white','border-green-500');
+                b.classList.add('bg-white','text-neutral-700','border-neutral-200');
+            });
+            btn.classList.add('bg-gradient-to-br','from-green-600','to-green-400','text-white','border-green-500');
+            btn.classList.remove('bg-white','text-neutral-700','border-neutral-200');
+
             const rows = document.querySelectorAll('#historyBody tr');
-            let visibleCount = 0;
+            let visible = 0;
             rows.forEach(row => {
                 const match = status === 'all' || row.dataset.status === status;
                 row.style.display = match ? '' : 'none';
-                if (match) visibleCount++;
+                if (match) visible++;
             });
-
-            // Show/hide no-data
-            document.getElementById('noData').classList.toggle('hidden', visibleCount > 0);
+            document.getElementById('noData').classList.toggle('hidden', visible > 0);
         }
 
+        // ── SEARCH ──
         function searchHistory(query) {
             const rows = document.querySelectorAll('#historyBody tr');
             const term = query.toLowerCase();
@@ -362,19 +373,25 @@
             document.getElementById('noData').classList.toggle('hidden', visible > 0);
         }
 
-        function viewDetail(id) {
-            alert('Menampilkan detail transaksi ' + id);
+        // ── POPUP BUKTI ──
+        function bukaPopup(trx) {
+            currentTrx = trx;
+            document.getElementById('popDate').innerText   = trx.tanggal;
+            document.getElementById('popId').innerText     = trx.id;
+            document.getElementById('popUser').innerText   = trx.user || sessionStorage.getItem("user") || '-';
+            document.getElementById('popKios').innerText   = trx.kios;
+            document.getElementById('popJenis').innerText  = `Pajak ${trx.jenis}`;
+            document.getElementById('popMetode').innerText = trx.metode;
+            document.getElementById('popTotal').innerText  = 'Rp ' + trx.jumlah.toLocaleString('id-ID');
+            document.getElementById('popupOverlay').classList.add('show');
         }
 
-        const user = sessionStorage.getItem("user");
-        document.getElementById("navUsername").innerText = user;
-        document.getElementById("avatarInitial").innerText = user.charAt(0).toUpperCase();
+        function tutupPopup() {
+            document.getElementById('popupOverlay').classList.remove('show');
+            currentTrx = null;
+        }
     </script>
-
-    <!-- Footer -->
-    <footer class="bg-green-800 text-green-300 text-center text-xs py-4 mt-10">
-        &copy; 2026 <span class="text-yellow-400 font-bold">SIPESEL</span> — Sistem Informasi Pembayaran Pajak Pasar. All rights reserved.
-    </footer>
 
 </body>
 </html>
+        
