@@ -1,3 +1,44 @@
+<?php
+// ===== KONFIGURASI DATABASE =====
+$host = "localhost";
+$user = "root";       // Sesuaikan dengan user database kamu
+$pass = "";           // Sesuaikan dengan password database kamu
+$db   = "sipesel";    // Ganti dengan nama database kamu
+
+// Membuat koneksi
+$conn = new mysqli($host, $user, $pass, $db);
+
+// Cek koneksi
+if ($conn->connect_error) {
+    die("Koneksi database gagal: " . $conn->connect_error);
+}
+
+// Mengambil data dari tabel transaksi
+// Pastikan nama kolom di query AS (alias) sesuai dengan properti JSON yang dibutuhkan Javascript
+$sql = "SELECT 
+            no_trx AS id, 
+            nomor_kios AS kios, 
+            jenis_pajak AS jenis, 
+            metode_pembayaran AS metode, 
+            nominal AS jumlah, 
+            tanggal, 
+            status 
+        FROM transaksi 
+        ORDER BY id_transaksi DESC";
+$result = $conn->query($sql);
+
+$data_transaksi = [];
+if ($result && $result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        // Ubah string jumlah menjadi integer (angka) agar kalkulasi di JS tidak error
+        $row['jumlah'] = (int)$row['jumlah'];
+        $data_transaksi[] = $row;
+    }
+}
+
+// Konversi data PHP ke format JSON agar bisa dibaca oleh Javascript
+$json_transaksi = json_encode($data_transaksi);
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -38,7 +79,6 @@
 </head>
 <body class="bg-green-50 text-neutral-900 min-h-screen">
 
-    <!-- ===== NAVBAR ===== -->
     <header class="shadow-xl sticky top-0 z-50" style="background: linear-gradient(to right, #166534, #15803d, #166534);">
         <div class="py-2 px-6" style="border-bottom: 1px solid rgba(22,163,74,0.4);">
             <div class="max-w-6xl mx-auto flex items-center justify-between">
@@ -55,27 +95,25 @@
             </div>
         </div>
         <nav class="max-w-6xl mx-auto px-6 flex items-center gap-1 py-2">
-            <a href="dashboard.html" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
+            <a href="dashboard.php" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
                  <span>Dashboard</span>
             </a>
-            <a href="pembayaran.html" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
+            <a href="pembayaran.php" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
                  <span>Pembayaran</span>
             </a>
-            <a href="riwayat.html" class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm flex items-center gap-2">
+            <a href="riwayat.php" class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm flex items-center gap-2">
                  <span>Riwayat Bayar</span>
             </a>
             <div class="ml-auto">
-                <a href="login.html" class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 flex items-center gap-2">
+                <a href="login.php" class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 flex items-center gap-2">
                      <span>Keluar</span>
                 </a>
             </div>
         </nav>
     </header>
 
-    <!-- ===== CONTENT ===== -->
     <div class="max-w-6xl mx-auto px-6 py-8">
 
-        <!-- Page Header -->
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-5 mb-10">
             <h1 class="font-extrabold text-4xl text-neutral-900" style="font-family:'Montserrat',sans-serif;">
                 Riwayat Pembayaran
@@ -100,10 +138,9 @@
             </div>
         </div>
 
-        <!-- Stats Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-10">
             <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600">
-                <p class="text-neutral-500 text-sm mb-2">Total Pembayaran Tahun Ini</p>
+                <p class="text-neutral-500 text-sm mb-2">Total Pembayaran</p>
                 <p class="font-extrabold text-3xl text-neutral-900" id="statTotal" style="font-family:'Montserrat',sans-serif;">Rp 0</p>
             </div>
             <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600">
@@ -111,12 +148,11 @@
                 <p class="font-extrabold text-3xl text-neutral-900" id="statJumlah" style="font-family:'Montserrat',sans-serif;">0</p>
             </div>
             <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600">
-                <p class="text-neutral-500 text-sm mb-2">Rata-rata per Transaksi</p>
+                <p class="text-neutral-500 text-sm mb-2">Rata-rata Transaksi</p>
                 <p class="font-extrabold text-3xl text-neutral-900" id="statRataRata" style="font-family:'Montserrat',sans-serif;">Rp 0</p>
             </div>
         </div>
 
-        <!-- History Card -->
         <div class="bg-white rounded-2xl p-8 shadow-sm">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <h2 class="font-bold text-2xl text-neutral-900" style="font-family:'Montserrat',sans-serif;">Daftar Transaksi</h2>
@@ -128,7 +164,6 @@
                 </div>
             </div>
 
-            <!-- Table -->
             <div class="overflow-x-auto">
                 <table class="w-full border-separate border-spacing-y-3" id="historyTable">
                     <thead>
@@ -142,41 +177,35 @@
                         </tr>
                     </thead>
                     <tbody id="historyBody">
-                        <!-- Diisi oleh JavaScript -->
-                    </tbody>
+                        </tbody>
                 </table>
             </div>
 
-            <!-- No Data -->
             <div id="noData" class="hidden text-center py-16 text-neutral-400">
                 <div class="text-5xl mb-3"></div>
                 <p class="font-semibold text-base">Belum ada transaksi</p>
-                <a href="pembayaran.html" class="inline-block mt-4 px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition">
+                <a href="pembayaran.php" class="inline-block mt-4 px-6 py-2.5 bg-green-600 text-white rounded-xl text-sm font-semibold hover:bg-green-700 transition">
                     + Bayar Sekarang
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- ===== POPUP BUKTI ===== -->
     <div id="popupOverlay" class="popup-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center p-4">
         <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden">
 
-            <!-- Header struk -->
             <div class="p-6 text-center" style="background: linear-gradient(135deg, #166534, #15803d);">
                 <p class="text-green-300 text-xs tracking-widest uppercase mb-1">Bukti Pembayaran</p>
                 <p class="text-yellow-400 font-extrabold text-xl tracking-widest" style="font-family:'Montserrat',sans-serif;">SIPESEL</p>
                 <p class="text-green-300 text-xs mt-1" id="popDate">-</p>
             </div>
 
-            <!-- Notch atas -->
             <div class="flex items-center px-4">
                 <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5 mt-0"></div>
                 <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
                 <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5 mt-0"></div>
             </div>
 
-            <!-- Detail -->
             <div id="buktContent" class="px-7 py-5 space-y-3">
                 <div class="flex justify-between text-sm">
                     <span class="text-neutral-400">No. Transaksi</span>
@@ -204,20 +233,17 @@
                 </div>
             </div>
 
-            <!-- Notch bawah -->
             <div class="flex items-center px-4">
                 <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5"></div>
                 <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
                 <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5"></div>
             </div>
 
-            <!-- Total -->
             <div class="px-7 py-5 bg-green-50 text-center">
                 <p class="text-neutral-400 text-xs mb-1">Total Dibayarkan</p>
                 <p class="font-extrabold text-3xl text-green-600" id="popTotal" style="font-family:'Montserrat',sans-serif;">Rp 0</p>
             </div>
 
-            <!-- Tombol -->
             <div class="p-5 flex gap-3">
                 <button onclick="tutupPopup()"
                         class="flex-1 py-2.5 border-2 border-neutral-200 text-neutral-600 rounded-xl text-sm font-semibold hover:border-red-300 hover:text-red-500 transition">
@@ -231,10 +257,8 @@
         </div>
     </div>
 
-    <!-- Area print tersembunyi -->
     <div id="printArea" style="display:none;"></div>
 
-    <!-- Footer -->
     <footer class="bg-green-800 text-green-300 text-center text-xs py-4 mt-10">
         &copy; 2026 <span class="text-yellow-400 font-bold">SIPESEL</span> — Sistem Informasi Pembayaran Pajak Pasar. All rights reserved.
     </footer>
@@ -245,16 +269,16 @@
 
         // ── ICONS metode ──
         const metodeIcon = {
-            'DANA'        : '',
-            'Transfer Bank': '',
-            'QRIS'         : '',
-            'Gopay': '',
+            'DANA'        : '💳',
+            'Transfer Bank': '🏦',
+            'QRIS'         : '📱',
+            'Gopay'       : '👛',
         };
 
         // ── LOAD ──
         window.onload = function () {
-            const user = sessionStorage.getItem("user");
-            if (!user) { window.location.href = "login.html"; return; }
+            // Logika User Session Frontend (Bisa diubah ke PHP Sessions jika diperlukan nantinya)
+            const user = sessionStorage.getItem("user") || "Pengguna";
             document.getElementById("navUsername").innerText = user;
             document.getElementById("avatarInitial").innerText = user.charAt(0).toUpperCase();
 
@@ -262,19 +286,12 @@
         };
 
         function loadRiwayat() {
-            // Gabungkan data hardcoded + localStorage
-            const stored = JSON.parse(localStorage.getItem('riwayat_bayar') || '[]');
-
-            // Data bawaan (demo)
-            const dummy = [
-                { id:'TRX-20260405-001234', kios:'K-001', jenis:'Bulanan',  metode:'Transfer Bank', jumlah:140000, tanggal:'5 April 2026',  status:'success', user:'Demo' },
-                { id:'TRX-20260328-000987', kios:'K-003', jenis:'Mingguan', metode:'QRIS',          jumlah:35000,  tanggal:'28 Maret 2026', status:'success', user:'Demo' },
-                { id:'TRX-20260325-000876', kios:'K-002', jenis:'Harian',   metode:'DANA',         jumlah:5000,   tanggal:'25 Maret 2026', status:'pending', user:'Demo' },
-                { id:'TRX-20260318-000765', kios:'K-004', jenis:'Bulanan',  metode:'Gopay',jumlah:140000, tanggal:'18 Maret 2026', status:'success', user:'Demo' },
-                { id:'TRX-20260305-000543', kios:'K-005', jenis:'Mingguan', metode:'Transfer Bank', jumlah:35000,  tanggal:'5 Maret 2026',  status:'failed',  user:'Demo' },
-            ];
-
-            allData = [...stored, ...dummy];
+            // MENGAMBIL DATA LANGSUNG DARI PHP DATABASE 
+            const dbData = <?php echo $json_transaksi; ?>;
+            
+            // Masukkan data DB ke variabel global untuk dipakai table & fitur search
+            allData = dbData;
+            
             renderTable(allData);
             updateStats(allData);
         }
@@ -289,11 +306,15 @@
             }
             document.getElementById('noData').classList.add('hidden');
 
-            data.forEach(trx => {
+data.forEach(trx => {
                 const icon = metodeIcon[trx.metode] || '💳';
-                const statusBadge = trx.status === 'success'
+                
+                // Ubah status dari database ke huruf kecil semua dulu biar aman
+                const statusDB = trx.status.toLowerCase(); 
+
+                const statusBadge = (statusDB === 'success' || statusDB === 'berhasil')
                     ? `<span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">✓ Berhasil</span>`
-                    : trx.status === 'pending'
+                    : statusDB === 'pending'
                     ? `<span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-600">⏳ Pending</span>`
                     : `<span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-600">✗ Gagal</span>`;
 
@@ -305,7 +326,7 @@
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-300 flex items-center justify-center text-xl flex-shrink-0">🏪</div>
                             <div>
-                                <p class="font-semibold text-neutral-900 text-sm">Pajak Kios ${trx.kios}</p>
+                                <p class="font-semibold text-neutral-900 text-sm">${trx.jenis} - Kios ${trx.kios}</p>
                                 <p class="text-xs text-neutral-400 font-mono">${trx.id}</p>
                             </div>
                         </div>
@@ -313,7 +334,7 @@
                     <td class="px-4 py-4 text-sm text-neutral-600">${trx.tanggal}</td>
                     <td class="px-4 py-4">
                         <span class="font-extrabold text-lg text-green-600" style="font-family:'Montserrat',sans-serif;">
-                            Rp ${trx.jumlah.toLocaleString('id-ID')}
+                            Rp ${parseInt(trx.jumlah).toLocaleString('id-ID')}
                         </span>
                     </td>
                     <td class="px-4 py-4 text-sm text-neutral-600">
@@ -331,9 +352,11 @@
             });
         }
 
-        function updateStats(data) {
-            const success = data.filter(d => d.status === 'success');
-            const total   = success.reduce((s, d) => s + d.jumlah, 0);
+function updateStats(data) {
+            // Ubah bagian ini agar membaca 'berhasil' dan kebal huruf besar/kecil
+            const success = data.filter(d => d.status.toLowerCase() === 'success' || d.status.toLowerCase() === 'berhasil');
+            
+            const total   = success.reduce((s, d) => s + parseInt(d.jumlah), 0);
             const rata    = success.length ? Math.round(total / success.length) : 0;
 
             document.getElementById('statTotal').innerText    = 'Rp ' + total.toLocaleString('id-ID');
@@ -382,7 +405,7 @@
             document.getElementById('popKios').innerText   = trx.kios;
             document.getElementById('popJenis').innerText  = `Pajak ${trx.jenis}`;
             document.getElementById('popMetode').innerText = trx.metode;
-            document.getElementById('popTotal').innerText  = 'Rp ' + trx.jumlah.toLocaleString('id-ID');
+            document.getElementById('popTotal').innerText  = 'Rp ' + parseInt(trx.jumlah).toLocaleString('id-ID');
             document.getElementById('popupOverlay').classList.add('show');
         }
 
@@ -390,8 +413,11 @@
             document.getElementById('popupOverlay').classList.remove('show');
             currentTrx = null;
         }
+
+        function simpanBukti() {
+            window.print();
+        }
     </script>
 
 </body>
 </html>
-        

@@ -1,3 +1,7 @@
+<?php
+include 'koneksi.php';
+session_start();
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -31,17 +35,15 @@
 
         <!-- BUTTON -->
         <div class="flex justify-center gap-4">
-
-            <a href="login.html"
+            <a href="login.php"
                class="bg-yellow-400 text-green-900 px-6 py-3 rounded-full font-semibold hover:scale-105 transition">
                Masuk
             </a>
 
-            <a href="register.html"
+            <a href="register.php"
                class="border border-white/30 px-6 py-3 rounded-full hover:bg-white/20 transition">
                Daftar
             </a>
-
         </div>
 
         <!-- FOOTER -->
