@@ -40,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Hash password
             $hashed_password = password_hash($password, PASSWORD_DEFAULT);
             
-            // Insert ke database (Alamat dihapus, Role ditambahkan)
+            // Insert ke database
             $sql = "INSERT INTO users (nama, username, password, email, nomor_hp, gender, role, no_kios) 
                     VALUES ('$nama', '$username', '$hashed_password', '$email', '$nomor_hp', '$gender', '$role', '$no_kios')";
             
@@ -92,37 +92,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             <?php endif; ?>
 
-            <form id="registerForm" method="POST" action="" class="space-y-4">
+            <form id="registerForm" method="POST" action="" autocomplete="off" class="space-y-4">
 
-                <input type="text" id="nama" name="nama" placeholder="Nama Lengkap" required
+                <input style="display:none" type="text" name="fakeusernameremembered" />
+                <input style="display:none" type="password" name="fakepasswordremembered" />
+
+                <input type="text" id="nama" name="nama" placeholder="Nama Lengkap" required autocomplete="off"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition"
                     value="<?php echo isset($_POST['nama']) ? htmlspecialchars($_POST['nama']) : ''; ?>">
 
-                <input type="text" name="username" placeholder="Username" required
+                <input type="text" name="username" placeholder="Username" required autocomplete="new-password"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition"
                     value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
 
-                <input type="email" name="email" placeholder="Email" required
+                <input type="email" name="email" placeholder="Email" required autocomplete="off"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition"
                     value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
 
-                <input type="text" name="nomor_hp" placeholder="Nomor HP" required
+                <input type="text" name="nomor_hp" placeholder="Nomor HP" required autocomplete="off"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition"
                     value="<?php echo isset($_POST['nomor_hp']) ? htmlspecialchars($_POST['nomor_hp']) : ''; ?>">
 
-                <input type="text" name="no_kios" id="no_kios" placeholder="Nomor Kios (Contoh: A-01)" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition"
-                    value="<?php echo isset($_POST['no_kios']) ? htmlspecialchars($_POST['no_kios']) : ''; ?>">            
-
-                <input type="password" name="password" placeholder="Password" required
+                <input type="password" name="password" placeholder="Password" required autocomplete="new-password"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition">
 
-                <select name="role" required
+                <select id="role" name="role" required autocomplete="off"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent outline-none transition bg-white text-gray-700 cursor-pointer">
                     <option value="" disabled <?php echo empty($_POST['role']) ? 'selected' : ''; ?>>Pilih Peran...</option>
                     <option value="pedagang" <?php echo (isset($_POST['role']) && $_POST['role'] == 'pedagang') ? 'selected' : ''; ?>>Pedagang</option>
                     <option value="pengawas" <?php echo (isset($_POST['role']) && $_POST['role'] == 'pengawas') ? 'selected' : ''; ?>>Pengawas</option>
                 </select>
+
+                <div id="kios_container" style="display: none;">
+                    <input type="text" id="no_kios" name="no_kios" placeholder="Nomor Kios (Contoh: A-01)" 
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-600 outline-none transition"
+                    value="<?php echo isset($_POST['no_kios']) ? htmlspecialchars($_POST['no_kios']) : ''; ?>">
+                </div>
 
                 <div>
                     <p class="text-sm text-gray-700 font-medium mb-2">Gender</p>
@@ -162,59 +167,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", function(){
+document.addEventListener("DOMContentLoaded", function() {
     const form = document.getElementById("registerForm");
-    const roleSelect = document.querySelector('select[name="role"]');
+    const roleSelect = document.getElementById("role"); 
     const kiosContainer = document.getElementById("kios_container");
     const kiosInput = document.getElementById("no_kios");
+    const namaInput = document.getElementById("nama");
 
-    form.addEventListener("submit", function(e){
-        
-        const regexNama = /^[a-zA-Z0-9' ]+$/;
-
-        if (!regexNama.test(namaInput.value)) {
-            e.preventDefault();
-            alert("Nama hanya boleh huruf, angka, spasi dan tanda petik (')!");
-            namaInput.focus();
-            return;
-        }
-
-        // Fungsi toggle input kios
-    roleSelect.addEventListener("change", function() {
-        if (this.value === "pedagang") {
-            kiosContainer.classList.remove("hidden");
-            kiosInput.setAttribute("required", "required");
-        } else {
-            kiosContainer.classList.add("hidden");
-            kiosInput.removeAttribute("required");
-            kiosInput.value = ""; // reset jika bukan pedagang
-        }
-    });
-
-    // Cek saat halaman dimuat (jika ada error tapi data tetap ada)
-    if (roleSelect.value === "pedagang") {
-        kiosContainer.classList.remove("hidden");
+    if (!roleSelect || !kiosContainer || !kiosInput) {
+        console.error("Gagal memuat script: Ada elemen yang tidak ditemukan.");
+        return; 
     }
 
-        // Cek semua input dan select dropdown
-        const inputs = form.querySelectorAll("input, select");
-        let lengkap = true;
+    function toggleKios() {
+        if (roleSelect.value === "pedagang") {
+            kiosContainer.style.display = "block"; // Munculkan paksa
+            kiosInput.setAttribute("required", "required");
+        } else {
+            kiosContainer.style.display = "none"; // Sembunyikan paksa
+            kiosInput.removeAttribute("required");
+            kiosInput.value = ""; 
+        }
+    }
 
-        inputs.forEach(input => {
-            if(input.type !== "radio" && input.value.trim() === ""){
-                lengkap = false;
+    roleSelect.addEventListener("change", toggleKios);
+    toggleKios();
+
+    if (form) {
+        form.addEventListener("submit", function(e) {
+            const regexNama = /^[a-zA-Z0-9' ]+$/;
+
+            if (!regexNama.test(namaInput.value)) {
+                e.preventDefault();
+                alert("Nama hanya boleh huruf, angka, spasi dan tanda petik (')!");
+                namaInput.focus();
+                return;
+            }
+
+            const inputs = form.querySelectorAll("input[required], select[required]");
+            let lengkap = true;
+
+            inputs.forEach(input => {
+                if(input.type !== "radio" && input.value.trim() === ""){
+                    lengkap = false;
+                }
+            });
+
+            const gender = form.querySelector('input[name="gender"]:checked');
+
+            if(!lengkap || !gender){
+                e.preventDefault();
+                alert("Harap isi semua kolom yang wajib diisi! ⚠️");
+                return;
             }
         });
-
-        const gender = form.querySelector('input[name="gender"]:checked');
-
-        if(!lengkap || !gender){
-            e.preventDefault();
-            alert("Form harus diisi semua! ⚠️");
-            return;
-        }
-    });
-
+    }
 });
 </script>
 

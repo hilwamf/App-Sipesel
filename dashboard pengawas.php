@@ -53,17 +53,17 @@ $inisial = strtoupper(substr($username, 0, 1)); // Mengambil huruf pertama untuk
             </div>
         </div>
         <nav class="max-w-6xl mx-auto px-6 flex items-center gap-1 py-2">
-            <a href="dashboard.php"
+            <a href="dashboard pengawas.php"
                class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm flex items-center gap-2">
                  <span>Dashboard</span>
             </a>
-            <a href="pembayaran.php"
+            <a href="monitoring_pengawas.php"
                class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
-                 <span>Pembayaran</span>
+                 <span>monitoring</span>
             </a>
-            <a href="riwayat.php"
+            <a href="laporan_pengawas.php"
                class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2">
-                 <span>Riwayat Bayar</span>
+                 <span>laporan</span>
             </a>
             <div class="ml-auto">
                 <a href="logout.php"

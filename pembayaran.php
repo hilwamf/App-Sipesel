@@ -2,68 +2,57 @@
 session_start();
 require_once 'koneksi.php';
 
-// 1. Cek Login
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
     exit();
 }
 
-// 2. Ambil Session
 $username = $_SESSION['username'];
-$id_user = $_SESSION['id_user'];
-$inisial = strtoupper(substr($username, 0, 1));
+$id_user  = $_SESSION['id_user'];
+$inisial  = strtoupper(substr($username, 0, 1));
 
-// =========================================================
-// 3. TARUH DI SINI: Ambil data no_kios untuk ditampilkan di form
-// =========================================================
-$query_user = "SELECT no_kios FROM users WHERE id_user = '$id_user'";
+$query_user  = "SELECT no_kios FROM users WHERE id_user = '$id_user'";
 $result_user = mysqli_query($conn, $query_user);
-
 if ($result_user && mysqli_num_rows($result_user) > 0) {
-    $user_data = mysqli_fetch_assoc($result_user);
+    $user_data   = mysqli_fetch_assoc($result_user);
     $kios_default = $user_data['no_kios'];
 } else {
     $kios_default = "";
 }
-// =========================================================
 
 $transaksi_sukses = false;
-$data_sukses = [];
+$data_sukses      = [];
 
-// 4. Proses jika tombol Bayar Sekarang ditekan
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['proses_bayar'])) {
-    
+
     $nomor_kios = mysqli_real_escape_string($conn, $_POST['nomor_kios']);
     $jenis_pajak = mysqli_real_escape_string($conn, $_POST['jenis_pajak']);
-    $metode = mysqli_real_escape_string($conn, $_POST['metode']);
-    $nominal = mysqli_real_escape_string($conn, $_POST['nominal']);
-    
-    // Buat Nomor Transaksi Unik & Tanggal
-    $no_trx = 'TRX-' . date('Ymd') . '-' . rand(100000, 999999);
-    $tanggal = date('Y-m-d H:i:s');
+    $metode      = mysqli_real_escape_string($conn, $_POST['metode']);
+    $nominal     = mysqli_real_escape_string($conn, $_POST['nominal']);
+
+    $no_trx       = 'TRX-' . date('Ymd') . '-' . rand(100000, 999999);
+    $tanggal      = date('Y-m-d H:i:s');
     $tanggal_tampil = date('d F Y');
 
-    // Insert ke Database Transaksi
-    $query = "INSERT INTO transaksi (id_user, no_trx, nomor_kios, jenis_pajak, metode_pembayaran, nominal, tanggal, status) 
-              VALUES ('$id_user', '$no_trx', '$nomor_kios', '$jenis_pajak', '$metode', '$nominal', '$tanggal', 'Berhasil')";
-              
+    // Status default = Pending, menunggu persetujuan Admin
+    $query = "INSERT INTO transaksi (id_user, no_trx, nomor_kios, jenis_pajak, metode_pembayaran, nominal, tanggal, status)
+              VALUES ('$id_user', '$no_trx', '$nomor_kios', '$jenis_pajak', '$metode', '$nominal', '$tanggal', 'Pending')";
+
     if (mysqli_query($conn, $query)) {
         $transaksi_sukses = true;
-        // Simpan data untuk ditampilkan di struk
         $data_sukses = [
-            'no_trx' => $no_trx,
-            'kios' => $nomor_kios,
-            'jenis' => $jenis_pajak,
-            'metode' => $metode,
+            'no_trx'  => $no_trx,
+            'kios'    => $nomor_kios,
+            'jenis'   => $jenis_pajak,
+            'metode'  => $metode,
             'nominal' => $nominal,
-            'tanggal' => $tanggal_tampil
+            'tanggal' => $tanggal_tampil,
         ];
     } else {
         echo "<script>alert('Terjadi kesalahan database: " . mysqli_error($conn) . "');</script>";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -98,8 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['proses_bayar'])) {
         .delay-3 { animation-delay:0.7s; opacity:0; }
         .overlay { display:none; }
         .overlay.show { display:flex; }
-        .page { display:none; }
-        .page.active { display:block; }
     </style>
 </head>
 <body class="bg-green-50 text-neutral-900 min-h-screen">
@@ -116,189 +103,192 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['proses_bayar'])) {
             </div>
         </div>
         <nav class="max-w-6xl mx-auto px-6 flex items-center gap-1 py-2">
-            <a href="dashboard.php" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2"> <span>Dashboard</span></a>
-            <a href="pembayaran.php" class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm flex items-center gap-2"> <span>Pembayaran</span></a>
-            <a href="riwayat.php" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200 flex items-center gap-2"> <span>Riwayat Bayar</span></a>
+            <a href="dashboard.php" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200"><span>Dashboard</span></a>
+            <a href="pembayaran.php" class="px-4 py-2 rounded-lg bg-yellow-400/20 border border-yellow-400/50 text-yellow-300 font-semibold text-sm"><span>Pembayaran</span></a>
+            <a href="riwayat.php" class="px-4 py-2 rounded-lg text-green-200 hover:bg-green-600/50 hover:text-white text-sm font-medium transition-all duration-200"><span>Riwayat Bayar</span></a>
             <div class="ml-auto">
-                <a href="logout.php" class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200 flex items-center gap-2"> <span>Keluar</span></a>
+                <a href="logout.php" class="px-4 py-2 rounded-lg bg-red-500/80 hover:bg-red-500 text-white text-sm font-semibold transition-all duration-200"><span>Keluar</span></a>
             </div>
         </nav>
     </header>
 
     <?php if (!$transaksi_sukses): ?>
-    <div id="page-form" class="page active">
-        <form action="" method="POST" id="formPembayaran">
-            <input type="hidden" name="jenis_pajak" id="inputJenis" required>
-            <input type="hidden" name="nominal" id="inputNominal" required>
-            <input type="hidden" name="metode" id="inputMetode" required>
-            <input type="hidden" name="proses_bayar" value="1">
+    <form action="" method="POST" id="formPembayaran">
+        <input type="hidden" name="jenis_pajak" id="inputJenis" required>
+        <input type="hidden" name="nominal"     id="inputNominal" required>
+        <input type="hidden" name="metode"      id="inputMetode" required>
+        <input type="hidden" name="proses_bayar" value="1">
 
-            <div class="max-w-3xl mx-auto px-6 py-10">
-                <div class="mb-8">
-                    <h1 class="font-extrabold text-4xl text-neutral-900 mb-1" style="font-family:'Montserrat',sans-serif;">Pembayaran Pajak</h1>
-                    <p class="text-neutral-500 text-sm">Pilih jenis pajak dan metode pembayaran Anda</p>
-                </div>
-
-                <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600 mb-6">
-                    <h2 class="font-bold text-lg text-neutral-800 mb-1 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">1</span>
-                        Pilih Jenis Pajak
-                    </h2>
-                    <p class="text-neutral-400 text-xs mb-6 ml-9">Pilih periode pembayaran pajak kios Anda</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Harian',5000)">
-                            <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
-                            <h3 class="font-bold text-neutral-800 mb-1 mt-3">Harian</h3>
-                            <p class="text-neutral-400 text-xs mb-3">Pembayaran per hari</p>
-                            <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 5.000</p>
-                        </div>
-                        <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Mingguan',35000)">
-                            <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
-                            <div class="w-fit mb-2 px-2 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-bold rounded-full uppercase tracking-wider mt-3">Populer</div>
-                            <h3 class="font-bold text-neutral-800 mb-1">Mingguan</h3>
-                            <p class="text-neutral-400 text-xs mb-3">Pembayaran per minggu</p>
-                            <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 35.000</p>
-                        </div>
-                        <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Bulanan',140000)">
-                            <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
-                            <div class="w-fit mb-2 px-2 py-0.5 bg-green-600 text-white text-[10px] font-bold rounded-full uppercase tracking-wider mt-3">Hemat</div>
-                            <h3 class="font-bold text-neutral-800 mb-1">Bulanan</h3>
-                            <p class="text-neutral-400 text-xs mb-3">Pembayaran per bulan</p>
-                            <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 140.000</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600 mb-6">
-                    <h2 class="font-bold text-lg text-neutral-800 mb-1 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">2</span>
-                        Nomor Kios
-                    </h2>
-                    <p class="text-neutral-400 text-xs mb-5 ml-9">Masukkan nomor kios yang akan dibayarkan</p>
-                    <input type="text" name="nomor_kios" id="nomorKios" 
-       value="<?= htmlspecialchars($kios_default) ?>" 
-       readonly 
-       class="w-full border-2 border-neutral-200 bg-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-green-500 transition-all duration-200 cursor-not-allowed" 
-       maxlength="10">
-                </div>
-
-                <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600 mb-6">
-                    <h2 class="font-bold text-lg text-neutral-800 mb-1 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">3</span>
-                        Metode Pembayaran
-                    </h2>
-                    <p class="text-neutral-400 text-xs mb-5 ml-9">Pilih cara pembayaran yang Anda inginkan</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetode(this,'DANA')">
-                            <div class="w-12 h-12 bg-green-100 rounded-xl overflow-hidden flex-shrink-0">
-                                <img src="images/DANA.jpg" alt="DANA" class="w-full h-full object-cover">
-                            </div>
-                            <div><p class="font-semibold text-neutral-800 text-sm">Dana</p><p class="text-neutral-400 text-xs">Bayar menggunakan saldo DANA anda</p></div>
-                        </div>
-                        <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetode(this,'Transfer Bank')">
-                            <div class="w-12 h-12 bg-blue-100 rounded-xl overflow-hidden flex-shrink-0">
-                                <img src="images/bank.jpg" alt="Bank" class="w-full h-full object-cover">
-                            </div>
-                            <div><p class="font-semibold text-neutral-800 text-sm">Transfer Bank</p><p class="text-neutral-400 text-xs">BRI / BNI / Mandiri</p></div>
-                        </div>
-                        <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetodeQRIS(this)">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl overflow-hidden flex-shrink-0">
-                                <img src="images/QRIS.jpg" alt="QRIS" class="w-full h-full object-cover">
-                            </div>
-                            <div><p class="font-semibold text-neutral-800 text-sm">QRIS</p><p class="text-neutral-400 text-xs">Scan QR dari dompet digital</p></div>
-                        </div>
-                        <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetode(this,'Gopay')">
-                            <div class="w-12 h-12 bg-yellow-100 rounded-xl overflow-hidden flex-shrink-0">
-                                <img src="images/Gopay.jpg" alt="Gopay" class="w-full h-full object-cover">
-                            </div>
-                            <div><p class="font-semibold text-neutral-800 text-sm">GoPay</p><p class="text-neutral-400 text-xs">Bayar menggunakan saldo Gopay anda</p></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-yellow-400 mb-8">
-                    <h2 class="font-bold text-lg text-neutral-800 mb-5 flex items-center gap-2">
-                        <span class="w-7 h-7 rounded-full bg-yellow-400 text-yellow-900 text-xs font-bold flex items-center justify-center">✦</span>
-                        Ringkasan Pembayaran
-                    </h2>
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-sm"><span class="text-neutral-500">Nomor Kios</span><span class="font-semibold text-neutral-800" id="sum-kios">-</span></div>
-                        <div class="flex justify-between text-sm"><span class="text-neutral-500">Jenis Pajak</span><span class="font-semibold text-neutral-800" id="sum-jenis">-</span></div>
-                        <div class="flex justify-between text-sm"><span class="text-neutral-500">Metode Bayar</span><span class="font-semibold text-neutral-800" id="sum-metode">-</span></div>
-                        <div class="border-t border-neutral-100 pt-3 flex justify-between items-center">
-                            <span class="font-bold text-neutral-800">Total Tagihan</span>
-                            <span class="font-extrabold text-2xl text-green-600" id="sum-total" style="font-family:'Montserrat',sans-serif;">Rp 0</span>
-                        </div>
-                    </div>
-                </div>
-
-                <button type="button" onclick="validasiDanKirim()"
-                        class="w-full py-4 text-white font-bold text-lg rounded-2xl hover:shadow-xl hover:shadow-green-200 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3"
-                        style="background:linear-gradient(to right,#15803d,#16a34a);">
-                    <span>Bayar Sekarang</span>
-                </button>
-                <p class="text-center text-neutral-400 text-xs mt-4">🔒 Transaksi dijamin aman dan terenkripsi</p>
+        <div class="max-w-3xl mx-auto px-6 py-10">
+            <div class="mb-8">
+                <h1 class="font-extrabold text-4xl text-neutral-900 mb-1" style="font-family:'Montserrat',sans-serif;">Pembayaran Pajak</h1>
+                <p class="text-neutral-500 text-sm">Pilih jenis pajak dan metode pembayaran Anda</p>
             </div>
-        </form>
-    </div>
-    
+
+            <!-- Pilih Jenis Pajak -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600 mb-6">
+                <h2 class="font-bold text-lg text-neutral-800 mb-1 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">1</span>
+                    Pilih Jenis Pajak
+                </h2>
+                <p class="text-neutral-400 text-xs mb-6 ml-9">Pilih periode pembayaran pajak kios Anda</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Harian',5000)">
+                        <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
+                        <h3 class="font-bold text-neutral-800 mb-1 mt-3">Harian</h3>
+                        <p class="text-neutral-400 text-xs mb-3">Pembayaran per hari</p>
+                        <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 5.000</p>
+                    </div>
+                    <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Mingguan',35000)">
+                        <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
+                        <div class="w-fit mb-2 px-2 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-bold rounded-full uppercase tracking-wider mt-3">Populer</div>
+                        <h3 class="font-bold text-neutral-800 mb-1">Mingguan</h3>
+                        <p class="text-neutral-400 text-xs mb-3">Pembayaran per minggu</p>
+                        <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 35.000</p>
+                    </div>
+                    <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Bulanan',140000)">
+                        <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
+                        <div class="w-fit mb-2 px-2 py-0.5 bg-green-600 text-white text-[10px] font-bold rounded-full uppercase tracking-wider mt-3">Hemat</div>
+                        <h3 class="font-bold text-neutral-800 mb-1">Bulanan</h3>
+                        <p class="text-neutral-400 text-xs mb-3">Pembayaran per bulan</p>
+                        <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 140.000</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nomor Kios -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600 mb-6">
+                <h2 class="font-bold text-lg text-neutral-800 mb-1 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">2</span>
+                    Nomor Kios
+                </h2>
+                <p class="text-neutral-400 text-xs mb-5 ml-9">Nomor kios Anda</p>
+                <input type="text" name="nomor_kios" id="nomorKios"
+                    value="<?= htmlspecialchars($kios_default) ?>"
+                    readonly
+                    class="w-full border-2 border-neutral-200 bg-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none cursor-not-allowed"
+                    maxlength="10">
+            </div>
+
+            <!-- Metode Pembayaran -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-green-600 mb-6">
+                <h2 class="font-bold text-lg text-neutral-800 mb-1 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-full bg-green-600 text-white text-xs font-bold flex items-center justify-center">3</span>
+                    Metode Pembayaran
+                </h2>
+                <p class="text-neutral-400 text-xs mb-5 ml-9">Pilih cara pembayaran yang Anda inginkan</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetode(this,'DANA')">
+                        <div class="w-12 h-12 bg-green-100 rounded-xl overflow-hidden flex-shrink-0">
+                            <img src="images/DANA.jpg" alt="DANA" class="w-full h-full object-cover">
+                        </div>
+                        <div><p class="font-semibold text-neutral-800 text-sm">Dana</p><p class="text-neutral-400 text-xs">Bayar menggunakan saldo DANA anda</p></div>
+                    </div>
+                    <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetode(this,'Transfer Bank')">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl overflow-hidden flex-shrink-0">
+                            <img src="images/bank.jpg" alt="Bank" class="w-full h-full object-cover">
+                        </div>
+                        <div><p class="font-semibold text-neutral-800 text-sm">Transfer Bank</p><p class="text-neutral-400 text-xs">BRI / BNI / Mandiri</p></div>
+                    </div>
+                    <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetodeQRIS(this)">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl overflow-hidden flex-shrink-0">
+                            <img src="images/QRIS.jpg" alt="QRIS" class="w-full h-full object-cover">
+                        </div>
+                        <div><p class="font-semibold text-neutral-800 text-sm">QRIS</p><p class="text-neutral-400 text-xs">Scan QR dari dompet digital</p></div>
+                    </div>
+                    <div class="metode-card border-2 border-neutral-200 rounded-xl p-4 flex items-center gap-4" onclick="pilihMetode(this,'Gopay')">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl overflow-hidden flex-shrink-0">
+                            <img src="images/Gopay.jpg" alt="Gopay" class="w-full h-full object-cover">
+                        </div>
+                        <div><p class="font-semibold text-neutral-800 text-sm">GoPay</p><p class="text-neutral-400 text-xs">Bayar menggunakan saldo Gopay anda</p></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ringkasan -->
+            <div class="bg-white rounded-2xl p-8 shadow-sm border-t-4 border-yellow-400 mb-8">
+                <h2 class="font-bold text-lg text-neutral-800 mb-5 flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-full bg-yellow-400 text-yellow-900 text-xs font-bold flex items-center justify-center">✦</span>
+                    Ringkasan Pembayaran
+                </h2>
+                <div class="space-y-3">
+                    <div class="flex justify-between text-sm"><span class="text-neutral-500">Nomor Kios</span><span class="font-semibold text-neutral-800" id="sum-kios">-</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-neutral-500">Jenis Pajak</span><span class="font-semibold text-neutral-800" id="sum-jenis">-</span></div>
+                    <div class="flex justify-between text-sm"><span class="text-neutral-500">Metode Bayar</span><span class="font-semibold text-neutral-800" id="sum-metode">-</span></div>
+                    <div class="border-t border-neutral-100 pt-3 flex justify-between items-center">
+                        <span class="font-bold text-neutral-800">Total Tagihan</span>
+                        <span class="font-extrabold text-2xl text-green-600" id="sum-total" style="font-family:'Montserrat',sans-serif;">Rp 0</span>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" onclick="validasiDanKirim()"
+                class="w-full py-4 text-white font-bold text-lg rounded-2xl hover:shadow-xl hover:shadow-green-200 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-3"
+                style="background:linear-gradient(to right,#15803d,#16a34a);">
+                <span>Bayar Sekarang</span>
+            </button>
+            <p class="text-center text-neutral-400 text-xs mt-4">🔒 Transaksi dijamin aman dan terenkripsi</p>
+        </div>
+    </form>
+
     <?php else: ?>
-    <div id="page-sukses" class="page active">
-        <div class="max-w-lg mx-auto px-6 py-14">
-            <div class="text-center mb-8">
-                <div class="anim-pop w-28 h-28 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-green-300" style="background:linear-gradient(135deg,#22c55e,#16a34a);">
-                    <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                    </svg>
-                </div>
-                <h1 class="anim-fade delay-1 font-extrabold text-3xl text-neutral-900 mt-5" style="font-family:'Montserrat',sans-serif;">Pembayaran Berhasil!</h1>
-                <p class="anim-fade delay-2 text-neutral-500 text-sm mt-2">Terima kasih, transaksi Anda telah berhasil diproses.</p>
+    <!-- Halaman Sukses -->
+    <div class="max-w-lg mx-auto px-6 py-14">
+        <div class="text-center mb-8">
+            <div class="anim-pop w-28 h-28 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-yellow-300" style="background:linear-gradient(135deg,#facc15,#eab308);">
+                <!-- Ikon jam/pending -->
+                <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
             </div>
+            <h1 class="anim-fade delay-1 font-extrabold text-3xl text-neutral-900 mt-5" style="font-family:'Montserrat',sans-serif;">Pembayaran Dikirim!</h1>
+            <p class="anim-fade delay-2 text-neutral-500 text-sm mt-2">Transaksi Anda sedang menunggu verifikasi dari Admin.</p>
+        </div>
 
-            <div class="anim-fade delay-2 bg-white rounded-3xl shadow-xl overflow-hidden">
-                <div class="p-6 text-center" style="background:linear-gradient(135deg,#166534,#15803d);">
-                    <p class="text-green-300 text-xs tracking-widest uppercase mb-1">Bukti Pembayaran</p>
-                    <p class="text-yellow-400 font-extrabold text-xl tracking-widest" style="font-family:'Montserrat',sans-serif;">SIPESEL</p>
-                    <p class="text-green-300 text-xs mt-1"><?= $data_sukses['tanggal'] ?></p>
-                </div>
-                <div class="flex items-center px-4">
-                    <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5"></div>
-                    <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
-                    <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5"></div>
-                </div>
-                <div class="px-7 py-5 space-y-3.5">
-                    <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">No. Transaksi</span><span class="font-semibold text-neutral-700 font-mono text-xs"><?= $data_sukses['no_trx'] ?></span></div>
-                    <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Nama Pemilik</span><span class="font-semibold text-neutral-800"><?= htmlspecialchars($username) ?></span></div>
-                    <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Nomor Kios</span><span class="font-semibold text-neutral-800"><?= htmlspecialchars($data_sukses['kios']) ?></span></div>
-                    <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Jenis Pajak</span><span class="font-semibold text-neutral-800">Pajak <?= htmlspecialchars($data_sukses['jenis']) ?></span></div>
-                    <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Metode Bayar</span><span class="font-semibold text-neutral-800"><?= htmlspecialchars($data_sukses['metode']) ?></span></div>
-                    <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Status</span><span class="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-bold">✓ Berhasil</span></div>
-                </div>
-                <div class="flex items-center px-4">
-                    <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5"></div>
-                    <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
-                    <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5"></div>
-                </div>
-                <div class="px-7 py-5 bg-green-50 text-center">
-                    <p class="text-neutral-500 text-xs mb-1">Total Dibayarkan</p>
-                    <p class="font-extrabold text-4xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp <?= number_format($data_sukses['nominal'], 0, ',', '.') ?></p>
+        <div class="anim-fade delay-2 bg-white rounded-3xl shadow-xl overflow-hidden">
+            <div class="p-6 text-center" style="background:linear-gradient(135deg,#166534,#15803d);">
+                <p class="text-green-300 text-xs tracking-widest uppercase mb-1">Bukti Pembayaran</p>
+                <p class="text-yellow-400 font-extrabold text-xl tracking-widest" style="font-family:'Montserrat',sans-serif;">SIPESEL</p>
+                <p class="text-green-300 text-xs mt-1"><?= $data_sukses['tanggal'] ?></p>
+            </div>
+            <div class="flex items-center px-4">
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5"></div>
+                <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5"></div>
+            </div>
+            <div class="px-7 py-5 space-y-3.5">
+                <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">No. Transaksi</span><span class="font-semibold text-neutral-700 font-mono text-xs"><?= $data_sukses['no_trx'] ?></span></div>
+                <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Nama Pemilik</span><span class="font-semibold text-neutral-800"><?= htmlspecialchars($username) ?></span></div>
+                <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Nomor Kios</span><span class="font-semibold text-neutral-800"><?= htmlspecialchars($data_sukses['kios']) ?></span></div>
+                <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Jenis Pajak</span><span class="font-semibold text-neutral-800">Pajak <?= htmlspecialchars($data_sukses['jenis']) ?></span></div>
+                <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Metode Bayar</span><span class="font-semibold text-neutral-800"><?= htmlspecialchars($data_sukses['metode']) ?></span></div>
+                <div class="flex justify-between items-center text-sm"><span class="text-neutral-400">Status</span>
+                    <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-bold">⏳ Menunggu Verifikasi</span>
                 </div>
             </div>
+            <div class="flex items-center px-4">
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -ml-2.5"></div>
+                <div class="flex-1 border-t-2 border-dashed border-neutral-200 mx-2"></div>
+                <div class="w-5 h-5 rounded-full bg-green-50 flex-shrink-0 -mr-2.5"></div>
+            </div>
+            <div class="px-7 py-5 bg-green-50 text-center">
+                <p class="text-neutral-500 text-xs mb-1">Total Dibayarkan</p>
+                <p class="font-extrabold text-4xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp <?= number_format($data_sukses['nominal'], 0, ',', '.') ?></p>
+            </div>
+        </div>
 
-            <div class="anim-fade delay-3 grid grid-cols-2 gap-3 mt-6">
-                <a href="riwayat.php"
-                   class="py-3.5 border-2 border-green-600 text-green-700 rounded-2xl font-semibold text-sm text-center hover:bg-green-600 hover:text-white transition-all duration-300 flex items-center justify-center">
-                     Riwayat Pembayaran
-                </a>
-                <a href="pembayaran.php"
-                   class="py-3.5 bg-white border-2 border-neutral-200 text-neutral-700 rounded-2xl text-center font-semibold text-sm hover:border-green-500 hover:text-green-600 transition-all duration-300 flex items-center justify-center">
-                     Bayar Lagi
-                </a>
-            </div>
+        <div class="anim-fade delay-3 grid grid-cols-2 gap-3 mt-6">
+            <a href="riwayat.php" class="py-3.5 border-2 border-green-600 text-green-700 rounded-2xl font-semibold text-sm text-center hover:bg-green-600 hover:text-white transition-all duration-300 flex items-center justify-center">
+                Riwayat Pembayaran
+            </a>
+            <a href="pembayaran.php" class="py-3.5 bg-white border-2 border-neutral-200 text-neutral-700 rounded-2xl text-center font-semibold text-sm hover:border-green-500 hover:text-green-600 transition-all duration-300 flex items-center justify-center">
+                Bayar Lagi
+            </a>
         </div>
     </div>
     <?php endif; ?>
 
+    <!-- QRIS Overlay -->
     <div id="qrisOverlay" class="overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-50 items-center justify-center">
         <div class="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 text-center shadow-2xl">
             <h3 class="font-bold text-xl text-neutral-800 mb-1" style="font-family:'Montserrat',sans-serif;">Scan QRIS</h3>
@@ -351,41 +341,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['proses_bayar'])) {
         let qrisMetodeEl    = null;
 
         window.onload = function () {
-            // Pasang event listener untuk mengetik nomor kios agar ringkasan ter-update
             const inputKios = document.getElementById('nomorKios');
-            if (inputKios) {
-                inputKios.addEventListener('input', updateRingkasan);
-            }
+            if (inputKios) inputKios.addEventListener('input', updateRingkasan);
             updateRingkasan();
         };
 
-        // Memilih Jenis Pajak
         function pilihJenis(el, jenis, nominal) {
             document.querySelectorAll('.jenis-card').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
             selectedJenis   = jenis;
             selectedNominal = nominal;
-            
-            // Set input tersembunyi untuk PHP
-            document.getElementById('inputJenis').value = jenis;
+            document.getElementById('inputJenis').value   = jenis;
             document.getElementById('inputNominal').value = nominal;
-            
             updateRingkasan();
         }
 
-        // Memilih Metode Pembayaran
         function pilihMetode(el, metode) {
             document.querySelectorAll('.metode-card').forEach(c => c.classList.remove('selected'));
             el.classList.add('selected');
             selectedMetode = metode;
-            
-            // Set input tersembunyi untuk PHP
             document.getElementById('inputMetode').value = metode;
-            
             updateRingkasan();
         }
 
-        // QRIS popup
         function pilihMetodeQRIS(el) {
             if (!selectedNominal) { alert('Pilih jenis pajak terlebih dahulu!'); return; }
             qrisMetodeEl = el;
@@ -415,7 +393,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['proses_bayar'])) {
             qrisInterval = setInterval(tick, 1000);
         }
 
-        // Update Text Ringkasan UI
         function updateRingkasan() {
             const kios = document.getElementById('nomorKios').value || '-';
             document.getElementById('sum-kios').innerText   = kios;
@@ -424,14 +401,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['proses_bayar'])) {
             document.getElementById('sum-total').innerText  = selectedNominal ? 'Rp ' + selectedNominal.toLocaleString('id-ID') : 'Rp 0';
         }
 
-        // Validasi JavaScript sebelum Form Submit ke PHP
         function validasiDanKirim() {
             const kios = document.getElementById('nomorKios').value.trim();
-            if (!kios)           { alert('Masukkan nomor kios terlebih dahulu!'); document.getElementById('nomorKios').focus(); return; }
+            if (!kios)           { alert('Nomor kios tidak ditemukan!'); return; }
             if (!selectedJenis)  { alert('Pilih jenis pajak terlebih dahulu!'); return; }
             if (!selectedMetode) { alert('Pilih metode pembayaran terlebih dahulu!'); return; }
-
-            // Lolos validasi, kirim form ke PHP
             document.getElementById('formPembayaran').submit();
         }
     </script>

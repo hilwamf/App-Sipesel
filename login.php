@@ -1,13 +1,19 @@
 <?php
 session_start();
 
-
-// Panggil file koneksi database Anda (sesuaikan, jika namanya koneksi.php ubah menjadi 'koneksi.php')
+// Panggil file koneksi database
 require_once 'koneksi.php';
 
-// Jika user sudah login, langsung arahkan ke dashboard
-if (isset($_SESSION['username'])) {
-    header("Location: dashboard.php");
+// PERBAIKAN: Gunakan $_SESSION untuk mengecek apakah user sudah login
+if (isset($_SESSION['id_user']) && isset($_SESSION['role'])) {
+    // Redirect berdasarkan role
+    if ($_SESSION['role'] == 'pengawas') {
+        header("Location: dashboard pengawas.php");
+    } elseif ($_SESSION['role'] == 'admin') {
+        header("Location: Dashboard admin.php");
+    } else {
+        header("Location: dashboard.php");
+    }
     exit();
 }
 
@@ -35,10 +41,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['username'] = $row['username'];
                 $_SESSION['role'] = $row['role'];
                 $_SESSION['nama'] = $row['nama']; 
-                $_SESSION['no_kios'] = $user_data['no_kios'];
+                $_SESSION['no_kios'] = $row['no_kios'];
                 
-                // Sukses! Arahkan ke dashboard
-                header("Location: dashboard.php");
+                // Redirect berdasarkan role - SUDAH DIUPDATE UNTUK ADMIN
+                if ($row['role'] == 'pengawas') {
+                    header("Location: dashboard pengawas.php");
+                } elseif ($row['role'] == 'admin') {
+                    header("Location: Dashboard admin.php");
+                } else {
+                    header("Location: dashboard.php");
+                }
                 exit();
             } else {
                 $error = "Password yang Anda masukkan salah!";
@@ -49,6 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -96,8 +109,5 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             Belum punya akun? 
             <a href="register.php" class="text-yellow-400 font-semibold hover:underline">Daftar di sini</a>
         </p>
-
-    </div>
-
 </body>
 </html>
