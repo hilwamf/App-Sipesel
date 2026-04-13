@@ -9,7 +9,7 @@ if (!isset($_SESSION['role'])) {
 
 $username = $_SESSION['username'];
 $nama     = $_SESSION['nama'] ?? $username;
-$id_user  = $_SESSION['id_user'];
+$id_user  = $_SESSION['id_user']?? 0;
 $inisial  = strtoupper(substr($username, 0, 1));
 
 // ── Ambil notifikasi yang belum dibaca ────────────────────────────────────
