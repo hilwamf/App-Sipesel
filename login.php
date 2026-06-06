@@ -133,11 +133,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <form action="" method="POST" class="space-y-4">
 
-            <input type="text" name="username" placeholder="Username" required
+            <input type="text" name="username" placeholder="Username" required autocomplete="new-password"
                    class="w-full p-3 rounded-lg bg-white text-black outline-none focus:ring-2 focus:ring-yellow-400"
                    value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
 
-            <input type="password" name="password" placeholder="Password" required
+            <input type="password" name="password" placeholder="Password" required autocomplete="new-password"
                    class="w-full p-3 rounded-lg bg-white text-black outline-none focus:ring-2 focus:ring-yellow-400">
 
 
