@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['action']) && $_POST['a
     $nama = mysqli_real_escape_string($conn, $_POST['nama_setting']);
     $nilai = mysqli_real_escape_string($conn, $_POST['nilai']);
     $deskripsi = mysqli_real_escape_string($conn, $_POST['deskripsi']);
-    $sql = "INSERT INTO setting_sistem (nama_setting, nilai, deskripsi) VALUES ('$nama', '$nilai', '$deskripsi')";
+    $sql = "INSERT INTO settings (nama_setting, nilai, deskripsi) VALUES ('$nama', '$nilai', '$deskripsi')";
     if (mysqli_query($conn, $sql)) $pesan = "Setting baru berhasil ditambahkan!";
     else $error = "Gagal: nama setting sudah ada atau error lainnya.";
 }

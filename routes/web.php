@@ -66,3 +66,24 @@ Route::middleware(['auth', 'role:pengawas'])->prefix('pengawas')->name('pengawas
     Route::get('/laporan',     [PengawasController::class, 'laporan'])->name('laporan');
     Route::post('/kirim-notifikasi', [PengawasController::class, 'kirimNotifikasi'])->name('kirim-notifikasi');
 });
+
+// ── Profil (semua role yang login) ────────────────────────────────────────
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profil',  [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profil.edit');
+    Route::post('/profil', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profil.update');
+});
+
+// ── Berita (admin) ────────────────────────────────────────────────────────
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/berita',           [\App\Http\Controllers\Admin\AdminController::class, 'berita'])->name('berita');
+    Route::post('/berita/tambah',   [\App\Http\Controllers\Admin\AdminController::class, 'tambahBerita'])->name('tambah-berita');
+    Route::post('/berita/edit',     [\App\Http\Controllers\Admin\AdminController::class, 'editBerita'])->name('edit-berita');
+    Route::post('/berita/hapus',    [\App\Http\Controllers\Admin\AdminController::class, 'hapusBerita'])->name('hapus-berita');
+    Route::post('/berita/toggle',   [\App\Http\Controllers\Admin\AdminController::class, 'toggleBerita'])->name('toggle-berita');
+});
+
+// Mark notifikasi as read
+Route::middleware(['auth','role:pedagang'])->post('/pedagang/mark-notif-read', [\App\Http\Controllers\Pedagang\PedagangController::class, 'markNotifRead'])->name('pedagang.mark-notif-read');
+
+// Kirim notif dari laporan admin
+Route::middleware(['auth', 'role:admin'])->post('/admin/kirim-notif-laporan', [\App\Http\Controllers\Admin\AdminController::class, 'kirimNotifLaporan'])->name('admin.kirim-notif-laporan');

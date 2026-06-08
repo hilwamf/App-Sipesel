@@ -1,43 +1,109 @@
-<!DOCTYPE html>
-<html lang="id">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Dashboard Pengawas - SIPESEL</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>body{font-family:'Poppins',sans-serif;}</style>
-</head>
-<body style="background-image:url('{{ asset('images/kios2.jpg') }}');" class="relative min-h-screen text-white bg-cover bg-center">
-<div class="absolute inset-0 bg-black/30"></div>
-@include('layouts.pengawas-header')
+@extends('layouts.sidebar-admin')
+@section('title','Dashboard Pengawas - SIPESEL')
+@section('page-title','Dashboard Pengawas')
+@section('page-sub','Selamat datang, ' . auth()->user()->nama)
 
-<section class="relative z-10 px-6 md:px-20 py-12 min-h-screen">
-    <div class="max-w-4xl mx-auto">
-        <div class="mb-10">
-            <h1 class="text-3xl md:text-5xl font-bold mb-4 leading-tight">Dashboard Pengawas</h1>
-            <h2 class="text-lg mb-4 text-yellow-400">Halo, {{ $user->username }} 👋</h2>
-            <p class="text-sm md:text-lg opacity-90 mb-8">Anda masuk sebagai <span class="font-bold text-yellow-300">Pengawas</span></p>
-        </div>
+@section('styles')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+@endsection
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <a href="{{ route('pengawas.monitoring') }}" class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 flex items-center gap-4 hover:bg-white/15 transition-all hover:-translate-y-0.5">
-                <div class="w-14 h-14 bg-blue-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                </div>
-                <div>
-                    <p class="font-semibold text-lg">Monitoring</p>
-                    <p class="text-sm text-white/60">Pantau seluruh transaksi pembayaran</p>
-                </div>
-            </a>
-            <a href="{{ route('pengawas.laporan') }}" class="bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-6 flex items-center gap-4 hover:bg-white/15 transition-all hover:-translate-y-0.5">
-                <div class="w-14 h-14 bg-yellow-500/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                </div>
-                <div>
-                    <p class="font-semibold text-lg">Laporan</p>
-                    <p class="text-sm text-white/60">Status tagihan & jatuh tempo pedagang</p>
-                </div>
-            </a>
-        </div>
+@section('content')
+{{-- BANNER --}}
+<div class="rounded-2xl mb-6 text-white relative overflow-hidden" style="min-height:130px; background-image:url('{{ asset("images/kios2.jpg") }}'); background-size:cover; background-position:center;">
+    <div class="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+    <div class="relative p-6">
+        <p class="text-green-300 text-sm mb-1">Pengawas · SIPESEL</p>
+        <h2 class="text-2xl font-black" style="font-family:'Montserrat',sans-serif;">Halo, <span class="text-yellow-400">{{ auth()->user()->nama }}!</span></h2>
+        <p class="text-white/70 text-sm mt-1">Monitor kepatuhan pembayaran pajak pedagang.</p>
     </div>
-</section>
-</body>
-</html>
+</div>
+
+{{-- STAT CARDS --}}
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 text-center">
+        <p class="text-2xl font-black text-gray-800" style="font-family:'Montserrat',sans-serif;">{{ $totalPedagang }}</p>
+        <p class="text-xs text-gray-400 mt-1">Total Pedagang</p>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-green-100 text-center">
+        <p class="text-2xl font-black text-green-600" style="font-family:'Montserrat',sans-serif;">{{ $sudahBayar }}</p>
+        <p class="text-xs text-gray-400 mt-1">Sudah Bayar</p>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-red-100 text-center">
+        <p class="text-2xl font-black text-red-600" style="font-family:'Montserrat',sans-serif;">{{ $jatuhTempo }}</p>
+        <p class="text-xs text-gray-400 mt-1">Jatuh Tempo</p>
+    </div>
+    <div class="bg-white rounded-2xl p-4 shadow-sm border border-blue-100 text-center">
+        <p class="text-2xl font-black text-blue-600" style="font-family:'Montserrat',sans-serif;">{{ $kepatuhan }}%</p>
+        <p class="text-xs text-gray-400 mt-1">Kepatuhan</p>
+    </div>
+</div>
+
+{{-- CHARTS --}}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    {{-- Line chart: Tren Kepatuhan --}}
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-bold text-gray-800 text-sm mb-1">Tren Kepatuhan Pembayaran</h3>
+        <p class="text-xs text-gray-400 mb-4">Persentase pedagang yang bayar per bulan</p>
+        <canvas id="chartKepatuhan" height="130"></canvas>
+    </div>
+
+    {{-- Donut: Bayar vs Belum bulan ini --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+        <h3 class="font-bold text-gray-800 text-sm mb-1">Status Bulan Ini</h3>
+        <p class="text-xs text-gray-400 mb-4">Pedagang sudah & belum bayar</p>
+        <canvas id="chartBayar" height="130"></canvas>
+    </div>
+</div>
+@endsection
+
+@section('scripts')
+// Line chart kepatuhan
+new Chart(document.getElementById('chartKepatuhan').getContext('2d'), {
+    type: 'line',
+    data: {
+        labels: @json(collect($chartKepatuhan)->pluck('bulan')),
+        datasets: [{
+            label: 'Kepatuhan (%)',
+            data: @json(collect($chartKepatuhan)->pluck('kepatuhan')),
+            borderColor: '#16a34a',
+            backgroundColor: 'rgba(22,163,74,0.1)',
+            borderWidth: 2.5,
+            pointBackgroundColor: '#16a34a',
+            pointRadius: 4,
+            tension: 0.4,
+            fill: true,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+            y: {
+                beginAtZero: true, max: 100,
+                ticks: { callback: v => v+'%', font: { size: 10 } }
+            },
+            x: { ticks: { font: { size: 10 } } }
+        }
+    }
+});
+
+// Donut bayar vs belum
+const lastMonth = @json(end($chartKepatuhan));
+new Chart(document.getElementById('chartBayar').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+        labels: ['Sudah Bayar', 'Belum Bayar'],
+        datasets: [{
+            data: [{{ $sudahBayar }}, {{ $totalPedagang - $sudahBayar }}],
+            backgroundColor: ['rgba(22,163,74,0.85)', 'rgba(239,68,68,0.85)'],
+            borderWidth: 0, hoverOffset: 6,
+        }]
+    },
+    options: {
+        responsive: true, cutout: '68%',
+        plugins: {
+            legend: { position: 'bottom', labels: { font: { size: 11 }, padding: 12, usePointStyle: true } }
+        }
+    }
+});
+@endsection

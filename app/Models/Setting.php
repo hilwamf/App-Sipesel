@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Setting extends Model
 {
-    protected $table = 'setting_sistem';
+    protected $table = 'settings';
 
     protected $primaryKey = 'id_setting';
 
