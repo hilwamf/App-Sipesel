@@ -32,26 +32,33 @@ class PedagangController extends Controller
             ->orderByDesc('created_at')->limit(10)->get();
         $unread = Notifikasi::where('id_user', $id_user)->where('dibaca', false)->count();
 
-        $lastTrx = Transaksi::where('id_user', $id_user)->where('status', 'approved')
-            ->orderByDesc('tanggal')->first();
+        // Jatuh tempo KUMULATIF - tiap pembayaran extend dari jatuh tempo sebelumnya
+$allTrx = Transaksi::where('id_user', $id_user)
+    ->where('status', 'approved')
+    ->orderBy('tanggal')
+    ->get();
 
-        $jatuhTempoStr = null; $sisaHari = null; $sudahLewat = false;
-        $jatuhTempoDatetime = null;
+$jatuhTempoStr = null; $sisaHari = null; $sudahLewat = false;
+$jatuhTempoDatetime = null; $currentJt = null;
 
-        if ($lastTrx) {
-            $intervalMap = ['Harian' => 1, 'Mingguan' => 7, 'Bulanan' => 30];
-            $hari        = $intervalMap[$lastTrx->jenis_pajak] ?? 30;
-            // Jatuh tempo = tanggal bayar + interval, sampai akhir hari (23:59:59)
-            $jt          = $lastTrx->tanggal->copy()->addDays($hari)->endOfDay();
-            $now         = now();
-            $sudahLewat  = $jt->lt($now);
-            $sisaDetik   = $sudahLewat ? 0 : $now->diffInSeconds($jt);
-            // Countdown aktif jika sisa waktu <= 24 jam (86400 detik)
-            $showCountdown = !$sudahLewat && $sisaDetik <= 86400;
-            $sisaHari    = $sudahLewat ? abs((int)$jt->diffInDays($now)) : (int)$now->diffInDays($jt);
-            $jatuhTempoStr = $jt->locale('id')->isoFormat('D MMM YYYY');
-            $jatuhTempoDatetime = $jt->format('Y-m-d H:i:s'); // format untuk JS
-        }
+if ($allTrx->count() > 0) {
+    $intervalMap = ['Harian' => 1, 'Mingguan' => 7, 'Bulanan' => 30];
+    foreach ($allTrx as $trx) {
+        $hari = $intervalMap[$trx->jenis_pajak] ?? 30;
+        $startDate = ($currentJt && $currentJt->gt($trx->tanggal))
+            ? $currentJt->copy()
+            : $trx->tanggal->copy();
+        $currentJt = $startDate->addDays($hari)->endOfDay();
+    }
+    $now = now();
+    $sudahLewat  = $currentJt->lt($now);
+    $sisaHari    = $sudahLewat
+        ? abs((int)$currentJt->diffInDays($now))
+        : (int)$now->diffInDays($currentJt);
+    $jatuhTempoStr      = $currentJt->locale('id')->isoFormat('D MMM YYYY');
+    $jatuhTempoDatetime = $currentJt->format('Y-m-d H:i:s');
+}
+$lastTrx = $allTrx->sortByDesc('tanggal')->first();
 
         $transaksiTerbaru = Transaksi::where('id_user', $id_user)->orderByDesc('tanggal')->limit(5)->get();
         $totalBulanIni    = Transaksi::where('id_user', $id_user)->where('status','approved')
@@ -61,11 +68,10 @@ class PedagangController extends Controller
         $tarif      = $this->getTarif();
 
         $jatuhTempoDatetime = $jatuhTempoDatetime ?? null;
-        $showCountdown      = $showCountdown ?? false;
 
         return view('pedagang.dashboard', compact(
             'user','notifikasi','unread','lastTrx',
-            'jatuhTempoStr','jatuhTempoDatetime','sisaHari','sudahLewat','showCountdown',
+            'jatuhTempoStr','jatuhTempoDatetime','sisaHari','sudahLewat',
             'transaksiTerbaru','totalBulanIni','beritaList','tarif'
         ));
     }

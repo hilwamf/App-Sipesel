@@ -58,7 +58,7 @@
                         <span class="text-white/50 text-xs">Sisa Waktu</span>
                         <?php if($sudahLewat): ?>
                             <span class="font-bold text-xs text-red-300">⚠ Terlambat <?php echo e($sisaHari); ?> hari</span>
-                        <?php elseif($showCountdown): ?>
+                        <?php elseif($sisaHari === 0): ?>
                             <span class="font-bold text-xs text-yellow-300" id="countdownText">⏱ Menghitung...</span>
                         <?php else: ?>
                             <span class="font-bold text-xs text-green-300">✓ <?php echo e($sisaHari); ?> hari lagi</span>

@@ -58,7 +58,7 @@
                         <span class="text-white/50 text-xs">Sisa Waktu</span>
                         @if($sudahLewat)
                             <span class="font-bold text-xs text-red-300">⚠ Terlambat {{ $sisaHari }} hari</span>
-                        @elseif($showCountdown)
+                        @elseif($sisaHari === 0)
                             <span class="font-bold text-xs text-yellow-300" id="countdownText">⏱ Menghitung...</span>
                         @else
                             <span class="font-bold text-xs text-green-300">✓ {{ $sisaHari }} hari lagi</span>

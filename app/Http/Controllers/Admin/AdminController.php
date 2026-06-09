@@ -266,9 +266,42 @@ class AdminController extends Controller
         return back()->with('success','Setting dihapus!');
     }
 
-    public function generateTagihan()
+    public function generateTagihan(Request $request)
     {
-        return back()->with('success','Fitur generate tagihan tersedia.');
+        // Simpan semua setting dari form jika ada
+        if ($request->has('settings')) {
+            DB::transaction(function () use ($request) {
+                foreach ($request->input('settings', []) as $nama => $nilai) {
+                    Setting::updateOrCreate(
+                        ['nama_setting' => $nama],
+                        ['nilai' => $nilai]
+                    );
+                }
+            });
+        }
+
+        // Ambil tarif terbaru
+        $settings   = Setting::whereIn('nama_setting', ['harian_rate','mingguan_rate','bulanan_rate'])->pluck('nilai','nama_setting');
+        $harian     = number_format((int)($settings['harian_rate']   ?? 5000), 0, ',', '.');
+        $mingguan   = number_format((int)($settings['mingguan_rate'] ?? 35000), 0, ',', '.');
+        $bulanan    = number_format((int)($settings['bulanan_rate']  ?? 150000), 0, ',', '.');
+
+        // Kirim notifikasi ke semua pedagang
+        $pedagangList = User::where('role', 'pedagang')->get();
+        $bulan        = now()->locale('id')->isoFormat('MMMM YYYY');
+
+        DB::transaction(function () use ($pedagangList, $harian, $mingguan, $bulanan, $bulan) {
+            foreach ($pedagangList as $p) {
+                Notifikasi::create([
+                    'id_user'     => $p->id_user,
+                    'id_pengirim' => Auth::id(),
+                    'pesan'       => "Info Tarif Pajak {$bulan}: Harian Rp {$harian} | Mingguan Rp {$mingguan} | Bulanan Rp {$bulanan}. Segera lakukan pembayaran sebelum jatuh tempo.",
+                    'dibaca'      => false,
+                ]);
+            }
+        });
+
+        return back()->with('success', "Tarif berhasil disimpan & notifikasi dikirim ke {$pedagangList->count()} pedagang!");
     }
 
     public function berita()

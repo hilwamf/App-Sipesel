@@ -98,13 +98,18 @@
             </div>
         </div>
         <div class="flex items-center px-4 py-1"><div class="flex-1 border-t-2 border-dashed border-neutral-200"></div></div>
-        <div class="px-7 py-5 bg-green-50 text-center">
+        <div class="px-7 py-5 bg-green-50 text-center relative">
             <p class="text-neutral-500 text-xs mb-1">Total Dibayarkan</p>
             <p class="font-extrabold text-4xl text-green-600" id="popTotal" style="font-family:'Montserrat',sans-serif;">Rp 0</p>
+            <div id="lunasBadge" class="hidden absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rotate-[-20deg] border-4 border-green-500 text-green-500 font-black text-2xl px-4 py-1 rounded-lg opacity-70 tracking-widest" style="font-family:'Montserrat',sans-serif;">LUNAS</div>
+        </div>
+        <div class="px-7 py-2 text-center bg-green-50 border-t border-green-100">
+            <p class="text-xs text-neutral-400">Dicetak: <span id="popPrintDate"></span></p>
+            <p class="text-xs text-green-700 font-semibold">SIPESEL — Pasar Wadungasri Sidoarjo</p>
         </div>
         <div class="p-4 flex gap-3">
             <button onclick="tutupPopup()" class="flex-1 py-2.5 border-2 border-neutral-200 rounded-xl text-sm font-semibold text-neutral-600 hover:bg-neutral-50 transition">Tutup</button>
-            <button onclick="simpanBukti()" class="flex-1 py-2.5 text-white rounded-xl text-sm font-semibold transition" style="background:linear-gradient(to right,#15803d,#16a34a);">Simpan Bukti</button>
+            <button onclick="simpanGambar()" class="flex-1 py-2.5 text-white rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2" style="background:linear-gradient(to right,#15803d,#16a34a);"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Simpan Gambar</button>
         </div>
     </div>
 </div>
@@ -114,6 +119,7 @@
     &copy; 2026 <span class="text-yellow-400 font-bold">SIPESEL</span> — Sistem Informasi Pembayaran Pajak Pasar.
 </footer>
 
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 <script>
 let currentTrx=null,allData=[];
 const namaUser="<?php echo e($user->nama); ?>";
@@ -197,8 +203,30 @@ function bukaPopup(trx){
     document.getElementById('popupOverlay').classList.add('show');
 }
 function tutupPopup(){document.getElementById('popupOverlay').classList.remove('show');currentTrx=null;}
-function simpanBukti(){window.print();}
+function simpanGambar(){
+    const popupEl = document.querySelector('.popup-overlay.show > div');
+    if(!popupEl) return;
+    // Sembunyikan tombol sementara
+    const btns = popupEl.querySelectorAll('button');
+    btns.forEach(b => b.style.opacity='0');
+    html2canvas(popupEl, {
+        scale: 3,
+        backgroundColor: '#ffffff',
+        useCORS: true,
+        logging: false
+    }).then(canvas => {
+        btns.forEach(b => b.style.opacity='1');
+        const link = document.createElement('a');
+        const noTrx = currentTrx ? currentTrx.id.replace(/[^a-zA-Z0-9]/g,'_') : 'bukti';
+        link.download = 'bukti_' + noTrx + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }).catch(err => {
+        btns.forEach(b => b.style.opacity='1');
+        console.error(err);
+        alert('Gagal menyimpan gambar. Coba lagi.');
+    });
+}
 </script>
 </body>
-</html>
-<?php /**PATH C:\xampp\htdocs\Sipesel\resources\views/pedagang/riwayat.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\xampp\htdocs\Sipesel\resources\views/pedagang/riwayat.blade.php ENDPATH**/ ?>

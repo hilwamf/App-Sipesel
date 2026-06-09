@@ -52,25 +52,23 @@
             </h2>
             <p class="text-neutral-400 text-xs mb-6 ml-9">Pilih periode pembayaran pajak kios Anda</p>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Harian',5000)">
+                <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Harian',<?php echo e($tarif['harian']); ?>)">
                     <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
                     <h3 class="font-bold text-neutral-800 mb-1 mt-3">Harian</h3>
                     <p class="text-neutral-400 text-xs mb-3">Pembayaran per hari</p>
-                    <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 5.000</p>
+                    <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp <?php echo e(number_format($tarif['harian'],0,',','.')); ?></p>
                 </div>
-                <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Mingguan',35000)">
+                <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Mingguan',<?php echo e($tarif['mingguan']); ?>)">
                     <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
-                    <div class="w-fit mb-2 px-2 py-0.5 bg-yellow-400 text-yellow-900 text-[10px] font-bold rounded-full uppercase tracking-wider mt-3">Populer</div>
                     <h3 class="font-bold text-neutral-800 mb-1">Mingguan</h3>
                     <p class="text-neutral-400 text-xs mb-3">Pembayaran per minggu</p>
-                    <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 35.000</p>
+                    <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp <?php echo e(number_format($tarif['mingguan'],0,',','.')); ?></p>
                 </div>
-                <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Bulanan',140000)">
+                <div class="jenis-card border-2 border-neutral-200 rounded-2xl p-5 relative" onclick="pilihJenis(this,'Bulanan',<?php echo e($tarif['bulanan']); ?>)">
                     <div class="jenis-check absolute top-3 right-3 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">✓</div>
-                    <div class="w-fit mb-2 px-2 py-0.5 bg-green-600 text-white text-[10px] font-bold rounded-full uppercase tracking-wider mt-3">Hemat</div>
                     <h3 class="font-bold text-neutral-800 mb-1">Bulanan</h3>
                     <p class="text-neutral-400 text-xs mb-3">Pembayaran per bulan</p>
-                    <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp 140.000</p>
+                    <p class="font-extrabold text-2xl text-green-600" style="font-family:'Montserrat',sans-serif;">Rp <?php echo e(number_format($tarif['bulanan'],0,',','.')); ?></p>
                 </div>
             </div>
         </div>
@@ -278,5 +276,4 @@ function validasiDanKirim(){
 }
 </script>
 </body>
-</html>
-<?php /**PATH C:\xampp\htdocs\Sipesel\resources\views/pedagang/pembayaran.blade.php ENDPATH**/ ?>
+</html><?php /**PATH C:\xampp\htdocs\Sipesel\resources\views/pedagang/pembayaran.blade.php ENDPATH**/ ?>

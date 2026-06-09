@@ -3,7 +3,6 @@
 <?php $__env->startSection('page-sub','Kelola data pedagang, pengawas, dan admin'); ?>
 
 <?php $__env->startSection('content'); ?>
-
 <?php if(session('success')): ?><div class="bg-green-50 border border-green-200 text-green-800 rounded-xl px-5 py-3 mb-5 flex items-center gap-2 text-sm"><svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><?php echo e(session('success')); ?></div><?php endif; ?>
 <?php if(session('error')): ?><div class="bg-red-50 border border-red-200 text-red-700 rounded-xl px-5 py-3 mb-5 text-sm"><?php echo e(session('error')); ?></div><?php endif; ?>
 
@@ -20,7 +19,8 @@
             </select>
             <button type="submit" class="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl text-sm">Cari</button>
         </form>
-        <button onclick="document.getElementById('modalAdd').classList.remove('hidden')" class="px-5 py-2.5 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-xl text-sm flex items-center gap-2">
+        <button onclick="document.getElementById('modalAdd').classList.remove('hidden')"
+            class="px-5 py-2.5 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-xl text-sm flex items-center gap-2">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Tambah User
         </button>
     </div>
@@ -41,7 +41,7 @@
                 <th class="px-5 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Aksi</th>
             </tr></thead>
             <tbody class="divide-y divide-gray-50">
-                <?php $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <?php $__empty_1 = true; $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $u): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                 <tr class="hover:bg-gray-50 transition">
                     <td class="px-5 py-4">
                         <div class="flex items-center gap-3">
@@ -53,13 +53,8 @@
                         </div>
                     </td>
                     <td class="px-5 py-4 text-sm text-gray-600"><?php echo e($u->email); ?></td>
-                    <td class="px-5 py-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-semibold <?php echo e($u->role==='admin'?'bg-red-100 text-red-700':($u->role==='pengawas'?'bg-blue-100 text-blue-700':'bg-green-100 text-green-700')); ?>"><?php echo e(ucfirst($u->role)); ?></span>
-                    </td>
-                    <td class="px-5 py-4">
-                        <?php if($u->no_kios): ?><span class="px-2 py-1 bg-blue-50 text-blue-700 font-bold text-xs rounded-lg"><?php echo e($u->no_kios); ?></span>
-                        <?php else: ?><span class="text-gray-300">—</span><?php endif; ?>
-                    </td>
+                    <td class="px-5 py-4"><span class="px-3 py-1 rounded-full text-xs font-semibold <?php echo e($u->role==='admin'?'bg-red-100 text-red-700':($u->role==='pengawas'?'bg-blue-100 text-blue-700':'bg-green-100 text-green-700')); ?>"><?php echo e(ucfirst($u->role)); ?></span></td>
+                    <td class="px-5 py-4"><?php if($u->no_kios): ?><span class="px-2 py-1 bg-blue-50 text-blue-700 font-bold text-xs rounded-lg"><?php echo e($u->no_kios); ?></span><?php else: ?><span class="text-gray-300">—</span><?php endif; ?></td>
                     <td class="px-5 py-4">
                         <div class="flex gap-2">
                             <button onclick='showEditModal(<?php echo json_encode($u, 15, 512) ?>)' class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold rounded-lg text-xs">Edit</button>
@@ -76,7 +71,9 @@
                         </div>
                     </td>
                 </tr>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                <tr><td colspan="5" class="px-5 py-10 text-center text-gray-400 text-sm">Tidak ada pengguna</td></tr>
+                <?php endif; ?>
             </tbody>
         </table>
     </div>
@@ -119,18 +116,18 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('scripts'); ?>
-function showEditModal(u){
-    document.getElementById('editId').value=u.id_user;
-    document.getElementById('editNama').value=u.nama;
-    document.getElementById('editEmail').value=u.email;
-    document.getElementById('editNomorHp').value=u.nomor_hp;
-    document.getElementById('editGender').value=u.gender;
-    document.getElementById('editRole').value=u.role;
-    document.getElementById('editNoKios').value=u.no_kios||'';
+function showEditModal(u) {
+    document.getElementById('editId').value = u.id_user;
+    document.getElementById('editNama').value = u.nama;
+    document.getElementById('editEmail').value = u.email;
+    document.getElementById('editNomorHp').value = u.nomor_hp;
+    document.getElementById('editGender').value = u.gender;
+    document.getElementById('editRole').value = u.role;
+    document.getElementById('editNoKios').value = u.no_kios || '';
     toggleKiosEdit();
     document.getElementById('modalEdit').classList.remove('hidden');
 }
-function toggleKiosAdd(){document.getElementById('kiosFieldAdd').style.display=document.getElementById('addRole').value==='pedagang'?'block':'none';}
-function toggleKiosEdit(){document.getElementById('kiosFieldEdit').style.display=document.getElementById('editRole').value==='pedagang'?'block':'none';}
+function toggleKiosAdd() { document.getElementById('kiosFieldAdd').style.display = document.getElementById('addRole').value==='pedagang'?'block':'none'; }
+function toggleKiosEdit() { document.getElementById('kiosFieldEdit').style.display = document.getElementById('editRole').value==='pedagang'?'block':'none'; }
 <?php $__env->stopSection(); ?>
 <?php echo $__env->make('layouts.sidebar-admin', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\Sipesel\resources\views/admin/users.blade.php ENDPATH**/ ?>

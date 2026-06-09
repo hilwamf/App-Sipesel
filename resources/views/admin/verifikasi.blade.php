@@ -4,17 +4,16 @@
 @section('page-sub','Approve atau reject pembayaran dari pedagang')
 
 @section('content')
-
 @if(session('success'))
-<div class="bg-green-50 border border-green-200 text-green-800 rounded-xl px-5 py-4 mb-5 flex items-center gap-3">
-    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+<div class="bg-green-50 border border-green-200 text-green-800 rounded-xl px-5 py-3 mb-5 flex items-center gap-2 text-sm">
+    <svg class="w-4 h-4 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
     {{ session('success') }}
 </div>
 @endif
 
 <div class="flex gap-2 mb-5">
     <button onclick="switchTab('pending')" id="tab-pending"
-        class="px-5 py-2 bg-green-700 text-white font-semibold rounded-xl text-sm transition flex items-center gap-2">
+        class="px-5 py-2 bg-green-700 text-white font-semibold rounded-xl text-sm flex items-center gap-2">
         Menunggu Verifikasi
         @if($pending->count() > 0)<span class="px-2 py-0.5 bg-red-500 text-white text-xs rounded-full">{{ $pending->count() }}</span>@endif
     </button>
@@ -24,7 +23,7 @@
     </button>
 </div>
 
-<div id="content-pending" class="tab-content active">
+<div id="content-pending">
     @if($pending->count() > 0)
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         @foreach($pending as $row)
@@ -50,7 +49,7 @@
                 </div>
             </div>
             <div class="px-5 pb-4 grid grid-cols-2 gap-2">
-                <form method="POST" action="{{ route('admin.proses-verifikasi') }}" onsubmit="return confirm('Setujui?')">
+                <form method="POST" action="{{ route('admin.proses-verifikasi') }}" onsubmit="return confirm('Setujui pembayaran ini?')">
                     @csrf<input type="hidden" name="id_transaksi" value="{{ $row->id_transaksi }}"><input type="hidden" name="action" value="approve">
                     <button type="submit" class="w-full py-2 bg-green-700 hover:bg-green-800 text-white font-semibold rounded-xl text-sm transition flex items-center justify-center gap-1">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Approve
@@ -75,7 +74,7 @@
     @endif
 </div>
 
-<div id="content-verified" class="tab-content hidden">
+<div id="content-verified" class="hidden">
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
@@ -98,7 +97,7 @@
                         <td class="px-5 py-4 text-sm text-gray-600">{{ $row->verified_at?->format('d M Y') ?? '-' }}</td>
                     </tr>
                     @empty
-                    <tr><td colspan="6" class="px-5 py-10 text-center text-gray-400 text-sm">Belum ada riwayat</td></tr>
+                    <tr><td colspan="6" class="px-5 py-10 text-center text-gray-400 text-sm">Belum ada riwayat verifikasi</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -111,7 +110,7 @@
     <div class="bg-white rounded-2xl shadow-xl p-6 w-full max-w-md">
         <div class="flex items-center justify-between mb-4">
             <h3 class="font-bold text-gray-800">Tolak Pembayaran</h3>
-            <button onclick="closeRejectModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500">✕</button>
+            <button onclick="closeRejectModal()" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 hover:bg-gray-200">✕</button>
         </div>
         <p class="text-sm text-gray-600 mb-4">Alasan penolakan untuk <span id="rejectNama" class="font-bold text-green-700"></span>:</p>
         <form method="POST" action="{{ route('admin.proses-verifikasi') }}">@csrf
@@ -129,15 +128,19 @@
 @endsection
 
 @section('scripts')
-if(window.history.replaceState) window.history.replaceState(null,null,window.location.href);
-function switchTab(tab){
-    document.querySelectorAll('.tab-content').forEach(c=>c.classList.add('hidden'));
-    document.getElementById('content-'+tab).classList.remove('hidden');
-    document.getElementById('tab-pending').className='px-5 py-2 bg-white text-gray-600 font-semibold rounded-xl text-sm border border-gray-200 hover:bg-green-50 transition flex items-center gap-2';
-    document.getElementById('tab-verified').className='px-5 py-2 bg-white text-gray-600 font-semibold rounded-xl text-sm border border-gray-200 hover:bg-green-50 transition';
-    document.getElementById('tab-'+tab).className='px-5 py-2 bg-green-700 text-white font-semibold rounded-xl text-sm transition flex items-center gap-2';
+function switchTab(tab) {
+    document.getElementById('content-pending').classList.toggle('hidden', tab !== 'pending');
+    document.getElementById('content-verified').classList.toggle('hidden', tab !== 'verified');
+    const base = 'px-5 py-2 font-semibold rounded-xl text-sm border border-gray-200 hover:bg-green-50 transition';
+    const active = 'px-5 py-2 bg-green-700 text-white font-semibold rounded-xl text-sm flex items-center gap-2';
+    document.getElementById('tab-pending').className = tab==='pending' ? active : base;
+    document.getElementById('tab-verified').className = tab==='verified' ? active : base;
 }
-function showRejectModal(id,nama){document.getElementById('rejectId').value=id;document.getElementById('rejectNama').textContent=nama;document.getElementById('modalReject').classList.remove('hidden');}
-function closeRejectModal(){document.getElementById('modalReject').classList.add('hidden');}
-document.getElementById('modalReject').addEventListener('click',function(e){if(e.target===this)closeRejectModal();});
+function showRejectModal(id, nama) {
+    document.getElementById('rejectId').value = id;
+    document.getElementById('rejectNama').textContent = nama;
+    document.getElementById('modalReject').classList.remove('hidden');
+}
+function closeRejectModal() { document.getElementById('modalReject').classList.add('hidden'); }
+document.getElementById('modalReject')?.addEventListener('click', function(e) { if(e.target===this) closeRejectModal(); });
 @endsection
